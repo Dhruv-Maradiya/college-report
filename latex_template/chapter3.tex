@@ -1,0 +1,318 @@
+\chapter{Proposed Methodology and Implementation}
+\label{Chapter 3}
+
+This chapter forms the bulk of the report. It begins with the development methodology used at Ignosis, then sketches the platform's architecture at a deployment level, and then walks through the four interlocking sub-systems that make up the product. The story we tell is intentionally feature-driven rather than file-driven: the central asset of the platform is a tenant-configurable workflow engine, and every other feature in the report -- the campaign module, the AI voice calling integration, the WhatsApp automation, the speed dialer -- is best understood as either a producer of work for that engine or a consumer of its actions.
+
+\section{Development Methodology}
+The Ignosis engineering team practises a plan-first, ship-small, code-review-heavy variant of agile delivery. Each unit of work begins in Jira and is decomposed into a short Markdown plan stored in the repository under \texttt{docs/plans/}. The plan answers four questions: what is the user-visible behaviour, what entities or tables change, what services or controllers are added or modified, and what tests need to be written. The plan is reviewed by the engineering lead before any code is written. Once accepted, a branch is created from \texttt{develop} following the Gitflow naming convention -- typically \texttt{feature/<kebab-name>} or \texttt{fix/<kebab-name>} -- and the implementation begins.
+
+Conventional commits are enforced. Each commit is prefixed with a type (\texttt{feat}, \texttt{fix}, \texttt{refactor}, \texttt{chore}, \texttt{docs}, \texttt{test}) and a scope. Pull requests on \texttt{develop} are rebased rather than squashed so the per-commit decision trail survives the merge. The \texttt{main} branch is the release branch and follows semantic versioning; the orchestrator at the time of writing is version 1.5.1.
+
+Tests live next to the code they exercise. The repository is configured with JUnit~5 and Mockito on the Java side and Vitest on the TypeScript side. Integration tests run against a Testcontainers-managed PostgreSQL instance, an embedded H2 for the lighter repository tests, and a stubbed Bolna service over Spring's \texttt{MockServerRestTemplateCustomizer}. The pipeline aborts when SonarQube reports either a new bug, a new code smell above the medium severity threshold or a new vulnerability of any severity. SonarQube also enforces a code-coverage floor of fifty percent on changed lines.
+
+\section{High-Level Architecture}
+The platform is a layered web application. At the front are three client surfaces: the agent-facing dashboard, the off-platform Electron desktop client that runs the WhatsApp workers, and the Android SMS sender app that lives on the agent's phone. Behind those sit two API services, the Spring Boot orchestrator and the Hono / Node.js automation service. The data layer combines PostgreSQL (for cases, campaigns and the job queue), Apache~Solr (for case search), ClickHouse (for analytics events) and Redis (for distributed locks and the priority queue). Below the data layer the platform talks to three families of external services: telephony (Bolna for the AI voice, Exotel for the actual call placement), the WhatsApp protocol (through Baileys), and the cellular SMS network (through the on-device Android SmsManager). Figure~\ref{fig:arch} renders this stack as a single diagram.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.45cm and 0.4cm,
+  box/.style={rectangle, draw, rounded corners=2pt, minimum height=0.85cm, minimum width=2.45cm, align=center, fill=blue!10},
+  apibox/.style={box, fill=orange!18},
+  databox/.style={box, fill=green!18},
+  combox/.style={box, fill=red!15},
+  custbox/.style={box, fill=yellow!25, minimum width=4cm},
+  lbl/.style={font=\footnotesize\itshape\bfseries, anchor=west},
+  arr/.style={-Latex, thick}
+]
+\node[box] (react) {Agent dashboard\\(React + Umi)};
+\node[box, right=of react] (electron) {Electron client\\(WhatsApp workers)};
+\node[box, right=of electron] (mobile) {Android SMS\\sender app};
+
+\node[apibox, below=1.1cm of react] (kc) {Keycloak\\(OIDC)};
+\node[apibox, right=of kc] (spring) {Spring Boot\\orchestrator};
+\node[apibox, right=of spring] (hono) {Hono / Node.js\\automation API};
+
+\node[databox, below=1.0cm of kc] (pg) {PostgreSQL\\cases, jobs};
+\node[databox, right=of pg] (solr) {Apache Solr\\search};
+\node[databox, right=of solr] (ch) {ClickHouse\\events};
+\node[databox, right=of ch] (rds) {Redis\\queue, locks};
+
+\node[combox, below=1.0cm of pg] (voice) {Bolna + Exotel\\(AI voice)};
+\node[combox, right=of voice] (wa) {WhatsApp\\(Baileys)};
+\node[combox, right=of wa] (sms) {SMS\\(Android SIM)};
+
+\node[custbox, below=0.7cm of wa] (cust) {Customer (delinquent case)};
+
+\node[lbl] at ($(react.west)+(-2.7,0)$) {Client};
+\node[lbl] at ($(kc.west)+(-2.7,0)$) {API};
+\node[lbl] at ($(pg.west)+(-2.7,0)$) {Data};
+\node[lbl] at ($(voice.west)+(-2.7,0)$) {Channels};
+
+\begin{scope}[on background layer]
+  \node[fit=(react)(mobile), draw, dashed, inner sep=4pt] {};
+  \node[fit=(kc)(hono), draw, dashed, inner sep=4pt] {};
+  \node[fit=(pg)(rds), draw, dashed, inner sep=4pt] {};
+  \node[fit=(voice)(sms), draw, dashed, inner sep=4pt] {};
+\end{scope}
+
+\draw[arr] (react) -- (spring);
+\draw[arr] (electron) -- (hono);
+\draw[arr] (mobile.south) to[bend right=25] (hono.north east);
+\draw[arr] (spring) -- (pg);
+\draw[arr] (spring) -- (solr);
+\draw[arr] (spring) -- (ch);
+\draw[arr] (spring) -- (rds);
+\draw[arr] (hono) -- (rds);
+\draw[arr] (spring) -- (voice);
+\draw[arr] (spring) -- (wa);
+\draw[arr] (hono) -- (wa);
+\draw[arr] (hono) -- (sms);
+\draw[arr] (voice) -- (cust);
+\draw[arr] (wa) -- (cust);
+\draw[arr] (sms) -- (cust);
+\draw[arr, dashed] (cust.east) to[bend right=40] node[midway, fill=white, font=\tiny] {webhook / SMS reply} (spring.east);
+\end{tikzpicture}
+\caption{High-level architecture of the AI-Based Collections Platform. Solid arrows show forward dispatch; the dashed arrow shows the return path used by Bolna webhooks and Android SMS-reply ingestion.}
+\label{fig:arch}
+\end{figure}
+
+The choice of a single multi-tenant monolith for the backend, rather than a fleet of microservices, was deliberate. The team is small (about a dozen engineers), the deployment volume is modest (currently four active lender tenants), and the operational overhead of microservices was judged disproportionate to the benefit. The orchestrator is, however, internally layered along clean boundaries -- controllers, services, repositories, model entities, DTOs -- so that an eventual split, if growth demands it, would not require a rewrite.
+
+The next sections walk through the four features that the rest of this report is built around. Section~\ref{sec:case-mgmt} describes case management, which is the data foundation. Section~\ref{sec:workflow} describes the workflow engine, which is the central runtime asset. Sections~\ref{sec:campaign}, \ref{sec:voice} and~\ref{sec:whatsapp} then describe the campaign module, the AI voice calling subsystem and the WhatsApp automation, each of which slots into the workflow engine as either a producer of work items or a consumer of workflow actions.
+
+\section{Case Management}
+\label{sec:case-mgmt}
+
+\subsection{The Case as the Unit of Work}
+The atomic unit of work in the platform is the {\em case}. A case represents a single delinquent loan account that has been allocated to the tenant for recovery in the current cycle. Concretely, a case carries the customer's identifying information, the loan account number, the principal and EMI amount, the days past due (DPD) at the time of allocation, the assigned bucket, the agent or AI track to which it is allocated, the current workflow node it sits on, and a thick journal of every interaction that has happened against it -- every call, every message, every payment event, every agent note.
+
+Two JPA entities express the bulk of this state. \texttt{Customer} holds the lender-stable identifying information (phone numbers, name, address, alternate contacts). \texttt{UserAllocation} captures the cycle-specific state: which workflow node the case is on, the current AI-call sub-state, the assigned agent, the loop counts for each node, and the next scheduled action. A third entity, \texttt{CampaignUser}, links a case to a campaign when the case is being driven through a campaign rather than reached individually.
+
+\subsection{Case Listing}
+The case listing screen is the first thing an agent sees when they log in. It is implemented in React with the UmiJS framework and the Ant Design Pro component library. The screen renders a server-side-paginated table of the cases currently assigned to the logged-in agent, with columns for customer name, loan account number, days past due, overdue amount, last contact attempt and current status. The default page size is twenty and the user can extend it up to one hundred.
+
+The backend endpoint that serves the listing is \texttt{GET /fiu/api/\{tenant\}/cases}. It accepts \texttt{page}, \texttt{size} and \texttt{sort} parameters together with any number of filter parameters that map onto QueryDSL predicates -- \texttt{bucket}, \texttt{statusIn}, \texttt{minDpd}, \texttt{maxDpd}, \texttt{assignedAgentId} and a free-text \texttt{search} that hits Solr. The repository builds the predicate dynamically and projects each row into a thin DTO so the entity graph is not fetched in full. Implementing this endpoint required learning the Spring Data JPA paging contract, the QueryDSL fluent API and the Ant Design Pro \texttt{ProTable} component in parallel, which is what Week~5 of the weekly progress report tracks.
+
+\subsection{Case Detail}
+The case detail screen is the heavyweight artefact in the dashboard. A single case detail page combines:
+
+\begin{itemize}
+\item Customer contact information: name, primary phone, alternate phones, email, address.
+\item Loan information: product, principal, tenor, interest rate, EMI amount, current outstanding, days past due, bucket.
+\item Full payment history: every EMI charged, every payment received, every bounce, every late fee.
+\item Interaction history: every call (manual or AI), with its outcome, duration, recording link and transcript; every WhatsApp thread; every SMS log; every agent note.
+\item AA-derived signals (when available): recent salary credits, recent large debits, balance trend over thirty days, detected income source.
+\item Workflow position: the current node in the workflow, the loop count against that node, the attempted retries and the next scheduled action.
+\end{itemize}
+
+To avoid a synchronous fan-out across half-a-dozen tables, the detail page uses progressive loading. The first request returns the core customer and loan information; the interaction history, payment history and AA signals are loaded as parallel XHRs. The Ant Design Pro \texttt{ProDescriptions} and \texttt{ProList} components are used to render the page; a small library of formatting helpers (\texttt{formatINR}, \texttt{formatDPD}, \texttt{statusBadge}) provides consistent currency, date and badge presentation across all the screens that show a case.
+
+\section{The Workflow Engine}
+\label{sec:workflow}
+
+\subsection{Why a Workflow Engine}
+Collection policy is the single thing that varies most between tenants. A private bank prefers a calm tele-calling sequence with WhatsApp reminders in between. An NBFC prefers an aggressive AI voice campaign in the first ninety-six hours and only escalates to an agent if the AI fails. A consumer-durable lender wants the workflow to never call after 7~PM, while a payday lender wants the opposite. Hard-coding this would explode the conditional logic across the codebase and would force a deployment every time a tenant tuned its policy.
+
+The platform addresses this by storing the policy as data. Every tenant has one or more {\em workflows} -- directed graphs whose nodes are concrete actions (\texttt{INITIATE\_AI\_CALL}, \texttt{SEND\_WHATSAPP\_REMINDER}, \texttt{SEND\_PAYMENT\_LINK}, \texttt{AGENT\_CALLBACK}, \texttt{WAIT\_FOR\_PAYMENT}, \texttt{ESCALATE\_TO\_HUMAN}, etc.) and whose transitions are MVEL2 expressions evaluated against a context map of variables. The runtime that drives a case through this graph is the workflow engine, implemented as the class \texttt{WorkflowEngine} in the orchestrator.
+
+\subsection{Anatomy of a Workflow}
+A workflow is a JSON document with three top-level keys: a list of nodes, a list of transitions and a starting node identifier. Each node carries a type (matching one of the supported action types), a configuration block specific to that type (for example, an AI calling node carries the Bolna agent identifier and the from-number pool reference), an allowed maximum loop count and a list of permissible outgoing transitions. Each transition carries an MVEL expression and a target node identifier; transitions are evaluated in declaration order and the first one whose expression returns \texttt{true} is taken.
+
+The expression evaluates against a context map populated by the engine at each step. The most useful keys, documented in the repository under \texttt{docs/MVEL-Workflow-Variables.md}, include the most recent call outcome (\texttt{lastOutcome}), the per-node loop count, the customer's days past due, the wall-clock hour, the most recent AA-derived signal, the bucket, the campaign priority and a handful of regulatory guards (\texttt{callFrequencyExhausted}, \texttt{stopCalling}). An example transition expression is:
+\begin{quote}
+\texttt{lastOutcome == "PROMISE\_TO\_PAY" \&\& ptpDate <= today + 3}
+\end{quote}
+which advances the case to a \texttt{WAIT\_FOR\_PAYMENT} node if the customer promised to pay within the next three days, and falls through to a different transition otherwise.
+
+\subsection{The Engine}
+The engine, sketched in Algorithm~\ref{alg:workflow}, is small. Given a case and its current node, the engine evaluates the node's action (synchronously if the action is cheap, asynchronously by scheduling a job if the action involves an external call), reads the resulting outcome into the context map, walks the outgoing transitions in order, and parks the case on the new node. If no transition matches, the case is moved into an error state for the QA team to inspect.
+
+\begin{algorithm}
+\caption{Workflow Engine -- Advance a Case}\label{alg:workflow}
+\begin{algorithmic}[1]
+\State \textbf{Input}: case $C$, workflow $W$
+\State $N \gets W.nodeOf(C.currentNodeId)$
+\State $result \gets$ execute $N$ against $C$, may be sync or async via a job
+\State Update context map with $result$ and $C$ state
+\For{$T$ in $N.transitions$}
+  \If{MVEL evaluation of $T.expression$ in context map is \texttt{true}}
+    \State $C.currentNodeId \gets T.targetNodeId$
+    \State $C.loopCount[T.targetNodeId] \gets C.loopCount[T.targetNodeId] + 1$
+    \State \textbf{return}
+  \EndIf
+\EndFor
+\State Park $C$ in error state with diagnostic context
+\end{algorithmic}
+\end{algorithm}
+
+A separate \texttt{WorkflowMigrationService} handles the case in which a tenant edits its workflow mid-cycle and existing cases need to be re-mapped onto the new graph. Tenants can compose workflows from a small palette of reusable sub-graphs (a ``gentle reminder'' sub-graph, an ``aggressive PTP recovery'' sub-graph, an ``escalation to legal'' sub-graph) so that the working-set of workflows in production is a handful of compositions rather than dozens of bespoke graphs.
+
+\subsection{The Job Queue Behind the Engine}
+Every workflow action that talks to an external system is executed asynchronously. The engine schedules a row in a database-backed job queue, a scheduled service polls for due jobs, takes a row-level lock with a 180-second TTL via the \texttt{LockEntity} table, looks up the executor for the job type and runs it. Concrete executor classes -- \texttt{AICampaignCallInitiateJobExecutor}, \texttt{AICampaignCallStatusPollJobExecutor}, \texttt{AICampaignPaymentLinkSendJobExecutor}, \texttt{AICampaignWorkflowJobExecutor}, \texttt{FetchCallRecordingJobExecutor} -- handle the different action types.
+
+The advantage of a database-backed queue, compared with a Redis queue, is that the entire state of every in-flight job is visible to ordinary SQL. When something is wrong with a campaign at 3~AM, the on-call engineer can query the \texttt{job} table directly to see exactly where each case is stuck. The downside is throughput -- the database is not Kafka -- but at the campaign volumes the platform sees in production this is not a constraint. A separate Redis priority queue handles the small subset of jobs where arrival-order latency dominates, in particular the auto-loading of the next case when an agent submits a disposition.
+
+\section{The Campaign Module}
+\label{sec:campaign}
+
+\subsection{A Campaign is a Workflow on a Batch}
+A campaign is the unit of bulk work in the platform. Conceptually a campaign is nothing more than ``run this workflow against this batch of cases over this calling window''. The atomic resource is the \texttt{Campaign} entity; the per-case state inside a campaign is the \texttt{CampaignUser} entity; the workflow itself is named on the campaign rather than embedded into it, so the same campaign can be re-run against a new batch by simply uploading a new CSV.
+
+\subsection{Campaign Creation and CSV Upload}
+The campaign creation form collects the campaign name, an optional description, a priority (low / medium / high), a target collection amount, an assignment rule (round-robin, weighted, manual) and a calling window (active hours during which AI calls are permitted). The CSV upload field accepts files up to fifty megabytes; on the client side the file is validated for extension, size and required columns before being submitted to the backend.
+
+The backend endpoint \texttt{POST /fiu/api/\{tenant\}/campaigns} accepts the form fields and the file as multipart data. The \texttt{CampaignCsvProcessorService} parses the CSV with the OpenCSV library, validates each row (phone present, due amount numeric and positive, name present, account number valid format) and emits a preview response that contains the total row count, the count of valid rows, the count of invalid rows and, for each invalid row, the row number and the reason. The campaign manager reviews the preview, fixes obvious issues if needed and submits the campaign for execution. Listing~\ref{lst:csv-validate} sketches the row-level validation routine.
+
+\begin{lstlisting}[caption={CSV row validation, abridged.}, label={lst:csv-validate}]
+ValidationResult validateRow(CsvRow row) {
+  if (isBlank(row.phone)) return reject("missing phone");
+  if (!E164.matches(row.phone)) return reject("phone not in E.164");
+  if (isBlank(row.name)) return reject("missing customer name");
+  if (row.dueAmount == null || row.dueAmount.signum() <= 0)
+    return reject("due amount must be positive");
+  if (isBlank(row.loanAccountNumber)) return reject("missing LAN");
+  return ValidationResult.ok();
+}
+\end{lstlisting}
+
+On final submission, the backend persists a \texttt{Campaign} entity along with one \texttt{CampaignUser} per valid row. Each \texttt{CampaignUser} carries the customer phone, name, due amount, the workflow node identifier of the starting node (taken from the chosen workflow) and an initial state of \texttt{ALLOCATED}. The campaign goes into the \texttt{SCHEDULED} or \texttt{ONGOING} state depending on whether a future start time was set.
+
+\subsection{Campaign Execution}
+Once a campaign is \texttt{ONGOING}, a scheduler picks it up on its next tick and begins enqueueing workflow advancement jobs for its \texttt{CampaignUser} rows. From this point onward the workflow engine described in Section~\ref{sec:workflow} drives every case independently -- each case sees its own sequence of nodes, its own AI call attempts, its own WhatsApp reminders. The campaign object itself merely accounts for progress: it tracks the number of cases by state, the total amount collected, the number of calls attempted and the number of calls connected, and surfaces those numbers on a dashboard view that updates in near-real time over Server-Sent Events.
+
+A campaign can be paused, resumed or marked complete. Pausing freezes the workflow engine for that campaign's cases -- no new jobs are scheduled -- but the scheduler continues to consume any jobs already in flight, so the campaign drains cleanly. Resuming re-enables the engine. A \texttt{CampaignCleanupService} handles the marked-complete case, archiving the campaign to a cold-storage table and freeing the workflow position for any case that did not reach a terminal state.
+
+\section{AI Voice Calling}
+\label{sec:voice}
+
+\subsection{Voice Calling is a Workflow Action}
+The defining feature of the platform is the AI voice calling subsystem. Architecturally, an AI call is just one of the action types the workflow engine can execute. When the engine reaches an \texttt{INITIATE\_AI\_CALL} node for a case, it schedules an \texttt{AICampaignCallInitiateJobExecutor} job. The executor reads the tenant-configured Bolna agent identifier from the node's configuration block, pulls the next phone number from the tenant's from-number pool through the \texttt{NumberRotationService}, builds the Bolna make-call payload from the case context (customer name, due amount, days past due, optional AA signals) and posts it to Bolna's REST API. The call is now Bolna's responsibility until it terminates.
+
+\subsection{The Bolna Pipeline}
+Bolna places the call through Exotel, conducts the conversation under the tenant's prompt template and emits a webhook to the orchestrator at termination. The webhook payload carries the call disposition, the duration, a structured extraction of variables (promise-to-pay date, dispute reason, callback request, language detected), a recording URL and the per-turn latency breakdown. The orchestrator's \texttt{VoiceCallWebhookProcessor} parses the payload, persists the outcome onto the case, cancels any status-poll job that may have been scheduled defensively, emits Prometheus metrics for the call and -- crucially -- re-enters the workflow engine for that case, so the workflow advances on the very same webhook request. Listing~\ref{lst:webhook} shows the relevant controller method.
+
+\begin{lstlisting}[caption={Bolna webhook handler.}, label={lst:webhook}]
+@PostMapping("/fiu/api/bolna-webhook")
+public ResponseEntity<Void> handle(@RequestBody BolnaWebHookRequest payload) {
+  voiceCallWebhookProcessor.applyTerminalStatus(payload);
+  bolnaCallMetricsService.emit(payload);
+  workflowEngine.advance(payload.getCaseId());
+  return ResponseEntity.ok().build();
+}
+\end{lstlisting}
+
+\subsection{From-Number Pool and Rotation}
+Each tenant configures a pool of caller-line identifiers (DIDs) that Exotel can dial out from. \texttt{NumberRotationService} cycles through this pool in a near-fair manner, with a small bias towards numbers that the customer is most likely to recognise (most often the lender's customer-care line). The bias is implemented as a weighted random draw with a periodic re-balancing pass that runs as the \texttt{NumberRotationBootstrap} bean during service start-up.
+
+\subsection{Speed Dialer for Human Agents}
+The speed dialer is the user-facing twin of the AI calling path. When a human agent is working on a campaign, the dashboard shows the active case in a panel. The agent has the customer dialled from their soft-phone, talks to the customer, fills out a short disposition form (Promise To Pay, Wrong Number, Customer Disputes the Amount, Callback Requested, etc.) and submits. The moment the disposition lands at the backend, the workflow engine evaluates the next node for the case, the case enters a terminal-for-this-agent state, and the speed dialer fetches the next pending case for the agent. The new case is pushed to the dashboard via Server-Sent Events. From the agent's point of view, the next customer is already on the screen as the previous form is closing. Algorithm~\ref{alg:speed-dialer} sketches the loop.
+
+\begin{algorithm}
+\caption{Speed Dialer Loop}\label{alg:speed-dialer}
+\begin{algorithmic}[1]
+\State \textbf{Input}: agent $A$ logged into campaign $C$
+\State Show $A$ the first pending case in $C.queue$ for $A$
+\Loop
+  \State $D \gets$ agent submits disposition for current case
+  \State Persist disposition; call workflowEngine.advance(case)
+  \State Cancel any pending status-poll jobs for the case
+  \State $next \gets$ next pending case for $A$ in $C.queue$
+  \If{$next$ is null}
+    \State Show ``Campaign complete'' and break
+  \Else
+    \State Push $next$ to dashboard via SSE
+  \EndIf
+\EndLoop
+\end{algorithmic}
+\end{algorithm}
+
+\section{WhatsApp Automation}
+\label{sec:whatsapp}
+
+The second large pillar of the platform is the WhatsApp automation subsystem. It lives in a separate repository, \texttt{collection-scripts}, and is a TypeScript / Node.js monorepo. The reason for keeping it out of the main orchestrator is operational: WhatsApp sessions are long-lived stateful connections to Meta's servers, they need physical phones for the initial QR pairing, and they have to survive infrastructure restarts. Embedding them in the Spring Boot service would have polluted the deployment story for the rest of the platform.
+
+\subsection{Why Baileys}
+The choice of the Baileys protocol library over the WhatsApp Cloud API was driven by three considerations. First, the Cloud API requires a template approval cycle for every new outbound copy, which is incompatible with the experimentation cadence the team wanted. Second, the Cloud API charges per message and the per-customer recovery in Indian collections is often only a few hundred rupees, so the unit economics suffer. Third, customers respond materially better to messages that arrive from a real consumer-grade WhatsApp number than to messages that come from an obviously-branded business account. Baileys is a TypeScript reimplementation of the WhatsApp WebSocket protocol that lets us drive a pool of consumer SIMs in software.
+
+\subsection{Session Manager}
+Each sender phone has its own session directory under \texttt{sessions/sender\_<phone>/}, which is the on-disk representation of Baileys' multi-file authentication state. On startup, the session manager loads the state, fetches the latest WhatsApp protocol version, opens a WebSocket and waits for the QR code to be scanned by a human operator on the corresponding physical phone. Once paired, the session persists across restarts. Listing~\ref{lst:session} shows an abridged version of the connect routine.
+
+\begin{lstlisting}[caption={Baileys session connect, abridged.}, label={lst:session}]
+const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+const { version } = await fetchLatestBaileysVersion();
+const sock = makeWASocket({
+  version, auth: state, printQRInTerminal: true,
+  browser: ['WhatsApp Sender', 'Chrome', '120.0.0'],
+  connectTimeoutMs: 60000,
+});
+sock.ev.on('creds.update', saveCreds);
+sock.ev.on('contacts.upsert', (contacts) => {
+  for (const c of contacts) {
+    if (c.lid && c.id?.includes('@s.whatsapp.net'))
+      setLidMapping(c.lid, c.id);
+  }
+  saveLidMap();
+});
+\end{lstlisting}
+
+\subsection{Sender Pool, Proportional Scheduling and Routing}
+A campaign that involves WhatsApp is associated with a pool of sender phones. A typical pool is between five and fifteen consumer-grade SIMs. When the campaign starts, the scheduler computes a proportional allocation of contacts across the pool: the share of contacts assigned to each sender is roughly its daily cap divided by the total cap across the pool, capped at the sender's own daily limit. The base inter-message interval per sender is the active window divided by the contacts assigned to that sender, clamped between a minimum and a maximum. The actual interval between any two messages is the base interval plus or minus a uniformly distributed jitter of forty percent.
+
+A shared contact queue with a {\em preferred sender} field lets a contact be soft-routed to a specific phone (typically the phone that already has an existing conversation with the customer). If the preferred sender is offline or banned, the contact falls back to whichever worker pulls next. This makes the system resilient to individual senders dying mid-cycle, because their orphaned contacts simply re-enter the shared pool.
+
+\subsection{Anti-Ban Heuristics}
+A non-trivial part of the engineering effort goes into avoiding the spam-detection heuristics that Meta runs against suspicious accounts. The exact rules are not public, but the community has converged on a small number of practices, all of which the platform implements:
+
+\begin{itemize}
+\item Dynamic per-sender intervals, as described above, scaled to the active window.
+\item Forty-percent jitter on every delay.
+\item Random batch sizes between three and twelve messages.
+\item Short breaks (one to five minutes) between batches.
+\item Long breaks (ten to thirty minutes) every five batches.
+\item Active-hours window (default 9~AM to 9~PM IST).
+\item Per-sender daily caps (default one hundred and fifty messages).
+\item Typing presence: before each send, \texttt{presenceSubscribe} is followed by \texttt{composing} for a duration proportional to the message length, then \texttt{paused}.
+\item Message variation: every outgoing message is rendered from a template with inline alternates (\texttt{\{Hello\textbar Hi\textbar Hey\}}) and optional micro-variations such as terminal-punctuation flips and zero-width-space insertion at a random character position.
+\item Hardcoded blocklist: a small list of phone-number prefixes (for example, regulator-side numbers) are never sent to.
+\end{itemize}
+
+\subsection{Block Detection and Sender Health}
+Block detection is reactive but fast. When Baileys returns an error whose message contains the substrings ``banned'', ``blocked'' or ``rate-limit'', the sender is taken out of rotation, the campaign's audit log records the suspected ban, and the orphaned contacts in the shared queue are re-assigned to the remaining workers. When Baileys returns a success status of zero (which the protocol uses to indicate a soft failure that does not throw), the same path is taken. A separate code path handles connection-class errors -- network drops, socket close events, timeouts -- with exponential backoff (three attempts, doubling the delay each time); a transient WebSocket drop is otherwise indistinguishable from a ban.
+
+\subsection{Integration with the Orchestrator's Workflow}
+A \texttt{SEND\_WHATSAPP\_REMINDER} workflow node, when reached for a case, posts a job to the Hono / Node.js automation API instead of to a database-backed job in the Spring Boot orchestrator. The automation service runs the WhatsApp send through the Baileys library, waits for the protocol-level acknowledgement, and POSTs the delivery outcome back to the orchestrator's customer-webhook endpoint. The webhook handler advances the workflow for the case on the back of that outcome. The end-to-end flow from a WhatsApp send through to the next workflow step therefore touches both the Java orchestrator and the Node.js service, but the two communicate exclusively through HTTP boundaries with API-key authentication and an idempotency key on every send.
+
+\section{SMS via Android}
+The SMS fallback channel is implemented as a small React Native (Expo) application that runs on an Android phone with an active consumer SIM. The application's native module wraps Android's \texttt{SmsManager} class and exposes two JavaScript functions: \texttt{sendSms(phone, message)} and \texttt{readSmsMessages(sinceMs)}. The native module is built through \texttt{expo prebuild}; the required runtime permissions (\texttt{SEND\_SMS}, \texttt{READ\_SMS}, \texttt{RECEIVE\_SMS}) are granted explicitly by the operator on first launch.
+
+The app's outbound flow respects a small set of throttling constants -- a per-message delay of five seconds, a batch size of five and a per-batch pause of five seconds -- to keep the SIM operator from flagging the device for abuse. An inbound flow runs every evening at seven o'clock IST: an Expo background task reads the new SMS messages from the on-device provider, zips them with the \texttt{fflate} library and POSTs them as multipart form data to the orchestrator's webhook. The orchestrator ingests them into the case timeline so that the agent sees every reply alongside the rest of the case detail. From the workflow engine's point of view, a \texttt{SEND\_SMS\_REMINDER} node is structurally identical to a \texttt{SEND\_WHATSAPP\_REMINDER} node -- it produces an outcome which then drives the next transition.
+
+\section{The Electron Desktop Application}
+The Electron desktop application is the operational vehicle that exposes the WhatsApp workers to the engineering team and to a small set of agency-side operators. On launch, the application starts the embedded Hono API server on the first free port from 3002, serves the React dashboard from disk and points a Chromium-based \texttt{BrowserWindow} at the local URL. From the user's point of view, the experience is indistinguishable from a stand-alone desktop application; under the covers, the same Hono API is exercised that the cloud-hosted service uses.
+
+The application has two main jobs. The first is to run WhatsApp campaigns from the operator's own machine, with locally-paired SIMs in the sender pool, which is useful when a quick-turn experiment is needed without going through the production fleet. The second is to scrape the chat history of the locally-paired phones at the end of every day and push the scraped data back to the central backend, so that the case management dashboard shows every WhatsApp conversation alongside the call history. The scraper uses whatsapp-web.js rather than Baileys because the richer scraping job benefits from the in-browser \texttt{Store} object that the WhatsApp Web client exposes; to avoid bundling Chromium, the application uses \texttt{@puppeteer/browsers} to download a stable Chrome build on first run into the user's data directory.
+
+\section{Observability and Operations}
+Operationally, the platform runs on AWS ECS with a single task definition per service. Metrics are emitted via Micrometer to a Prometheus registry that the Spring Boot actuator exposes on \texttt{/actuator/prometheus}. The registry is enriched with tenant tags so per-tenant dashboards can be cut by tenant. Sentry captures exceptions through the internal compatibility shim and ties them to release tags. ClickHouse receives a fire-and-forget event stream that is consumed by the in-product analytics dashboard. The single most useful observability investment was the standardisation of voice metric tags during the work on \texttt{feature/prometheus-metrics-voice}: every metric carries \texttt{tenant\_id}, \texttt{agent\_id} and a \texttt{source} tag so that latency dashboards can break out turn-by-turn latency from cold and warm turns separately.
+
+\section{Data Analysis on Customer Records}
+A one-off analysis project in Week~4 of the internship operated on a sample of roughly forty thousand customer records exported from one of the lender tenants. The dataset combined the customer's loan information, payment history and a summary of bank-statement-derived signals. The analysis was carried out in a Jupyter notebook using \texttt{pandas} for data manipulation and \texttt{matplotlib} for visualisation. Three patterns emerged with practical implications. Customers who had paid on the first attempt in any of the previous three cycles had a ninety-percent probability of paying on the first attempt in the next cycle; these are best served by a single SMS reminder rather than a call campaign. Customers whose detected salary credit fell in the first three days of the month had a materially higher response rate to outreach attempted on the fourth or fifth day. A long tail of customers had ticket sizes under one thousand rupees and recovery probabilities below ten percent, for which a single SMS is the only economically sensible touch. These findings were folded into the default workflow templates that the platform ships with for new tenants.
+
+\section{Summary of Contributions}
+The contributions I made to the platform, mapped onto the structure above, are:
+\begin{itemize}
+\item Case listing and case detail screens on the agent dashboard (Weeks 5 and 6).
+\item The bulk campaign module: creation form, CSV upload pipeline, validation and preview (Week 7).
+\item Speed dialer and the integration of AI voice calling into the workflow engine (Week 8).
+\item WhatsApp automation library, including session management, the sender pool scheduler and the anti-ban heuristics (Weeks 9 and 10).
+\item Multi-device rotation, block detection and message variation (Week 10).
+\item Electron desktop application with embedded API server and chat-history scraper (Week 11).
+\item Android SMS sender app with custom native module and the background SMS sync task (Weeks 10 and 11).
+\item Bolna webhook integration on the workflow path, including the cancellation of poll jobs and the per-turn Prometheus metrics.
+\item Python-pandas analysis of customer records (Week 4).
+\item Foundational training, code review participation and incident response throughout Weeks 1--3 and onwards.
+\end{itemize}
+
+Each of these contributions either produces work that the workflow engine consumes, consumes work that the workflow engine produces, or accelerates the human agent's interaction with cases that the workflow has already prioritised. The platform is therefore best understood as a workflow-centric system: every quantitative result in Chapter~\ref{Chapter 4} can be traced back to the fact that the workflow engine, the campaign module, the voice calling integration and the WhatsApp automation operate as a single coherent runtime.

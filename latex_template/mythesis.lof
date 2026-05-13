@@ -1,0 +1,8 @@
+\babel@toc {english}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces High-level architecture of the AI-Based Collections Platform. Solid arrows show forward dispatch; the dashed arrow shows the return path used by Bolna webhooks and Android SMS-reply ingestion.}}{16}{figure.caption.6}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Per-agent calls-per-shift distribution before (blue) and after (red) the speed-dialer rollout. The mean shifts from about 46 to about 87 calls per shift; the variance also collapses, which removes much of the agent-to-agent productivity spread.}}{32}{figure.caption.9}%
+\addvspace {10\p@ }

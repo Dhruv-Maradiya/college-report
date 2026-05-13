@@ -1,0 +1,83 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{Abstract}{viii}{figure.caption.1}%
+\contentsline {chapter}{Contents}{viii}{figure.caption.1}%
+\contentsline {chapter}{List of Figures}{xi}{chapter*.2}%
+\contentsline {chapter}{List of Tables}{xii}{chapter*.3}%
+\contentsline {chapter}{List of Abbreviations}{xiii}{chapter*.4}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Background}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}The Industry: Ignosis}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Title of the Project}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Problem Statement}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Motivation}{4}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Objective}{5}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Scope}{5}{section.1.7}%
+\contentsline {section}{\numberline {1.8}Approach}{6}{section.1.8}%
+\contentsline {section}{\numberline {1.9}Organisation of the Rest of the Report}{6}{section.1.9}%
+\contentsline {chapter}{\numberline {2}Literature Review and Problem Identification}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Existing Collection-Management Products}{8}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Conversational Voice Agents}{9}{section.2.2}%
+\contentsline {section}{\numberline {2.3}The WhatsApp Multi-Device Protocol}{9}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Anti-Spam and Rate-Limiting Heuristics}{10}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Account Aggregator Framework}{11}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Identity and Access Management with Keycloak}{11}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Apache Solr for Case Search}{11}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Workflow Engines and Rule Evaluation}{12}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Observability: Prometheus, Sentry and ClickHouse}{12}{section.2.9}%
+\contentsline {section}{\numberline {2.10}Problem Identification}{12}{section.2.10}%
+\contentsline {chapter}{\numberline {3}Proposed Methodology and Implementation}{14}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Development Methodology}{14}{section.3.1}%
+\contentsline {section}{\numberline {3.2}High-Level Architecture}{15}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Case Management}{16}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}The Case as the Unit of Work}{16}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Case Listing}{17}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Case Detail}{17}{subsection.3.3.3}%
+\contentsline {section}{\numberline {3.4}The Workflow Engine}{18}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Why a Workflow Engine}{18}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Anatomy of a Workflow}{18}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}The Engine}{19}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}The Job Queue Behind the Engine}{20}{subsection.3.4.4}%
+\contentsline {section}{\numberline {3.5}The Campaign Module}{20}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}A Campaign is a Workflow on a Batch}{20}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Campaign Creation and CSV Upload}{20}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Campaign Execution}{21}{subsection.3.5.3}%
+\contentsline {section}{\numberline {3.6}AI Voice Calling}{22}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Voice Calling is a Workflow Action}{22}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}The Bolna Pipeline}{22}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}From-Number Pool and Rotation}{23}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Speed Dialer for Human Agents}{23}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}WhatsApp Automation}{23}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Why Baileys}{24}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Session Manager}{24}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Sender Pool, Proportional Scheduling and Routing}{25}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.7.4}Anti-Ban Heuristics}{25}{subsection.3.7.4}%
+\contentsline {subsection}{\numberline {3.7.5}Block Detection and Sender Health}{26}{subsection.3.7.5}%
+\contentsline {subsection}{\numberline {3.7.6}Integration with the Orchestrator's Workflow}{26}{subsection.3.7.6}%
+\contentsline {section}{\numberline {3.8}SMS via Android}{26}{section.3.8}%
+\contentsline {section}{\numberline {3.9}The Electron Desktop Application}{27}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Observability and Operations}{27}{section.3.10}%
+\contentsline {section}{\numberline {3.11}Data Analysis on Customer Records}{28}{section.3.11}%
+\contentsline {section}{\numberline {3.12}Summary of Contributions}{28}{section.3.12}%
+\contentsline {chapter}{\numberline {4}Result Analysis}{30}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Outcomes of the Proposed Platform}{30}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Channel-Level Contact Rates}{31}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Speed Dialer Throughput}{31}{section.4.3}%
+\contentsline {section}{\numberline {4.4}WhatsApp Sender Pool Behaviour}{32}{section.4.4}%
+\contentsline {section}{\numberline {4.5}AI Voice Agent Performance}{33}{section.4.5}%
+\contentsline {section}{\numberline {4.6}System-Level Metrics}{34}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Failure Modes Observed in Production}{34}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Qualitative Feedback from Stakeholders}{35}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Conclusions and Future Work}{37}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Conclusion}{37}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Reflections on What Could Have Been Done Better}{38}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Future Work}{38}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Multi-Language Voice Agents}{38}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}AA-Driven Adaptive Workflows}{39}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Real-Time Sentiment Analysis}{39}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Predictive Prioritisation Model}{39}{subsection.5.3.4}%
+\contentsline {subsection}{\numberline {5.3.5}WhatsApp Number Health Scoring}{39}{subsection.5.3.5}%
+\contentsline {subsection}{\numberline {5.3.6}Lender-Side Allocation Self-Service}{40}{subsection.5.3.6}%
+\contentsline {subsection}{\numberline {5.3.7}Voice Agent Evaluation Pipeline}{40}{subsection.5.3.7}%
+\contentsline {section}{\numberline {5.4}Closing Note}{40}{section.5.4}%
+\contentsline {chapter}{Appendix A: Selected Source-Code Listings}{41}{chapter*.12}%
+\contentsline {chapter}{Bibliography}{43}{lstnumber.5.5.12}%

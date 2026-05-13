@@ -1,0 +1,1175 @@
+Delivered-To: dhruv.mce22@sot.pdpu.ac.in
+Received: by 2002:a05:6214:469c:b0:8b4:1b66:d23f with SMTP id or28csp83727qvb;
+        Fri, 8 May 2026 05:12:09 -0700 (PDT)
+X-Forwarded-Encrypted: i=2; AFNElJ+TZW9ZbMEHB61QP3appof77KaAiP/roxPcbXrL67OCQqGd8M5JJ9KWcIopbFAQB5PvDJ1EHCih4za8qg==@sot.pdpu.ac.in
+X-Received: by 2002:a05:620a:7017:b0:8cd:b44d:b1c0 with SMTP id af79cd13be357-904d70c350amr1761369785a.53.1778242328230;
+        Fri, 08 May 2026 05:12:08 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778242328; cv=none;
+        d=google.com; s=arc-20240605;
+        b=DbCVgc9MRyHSup9Q4ITuMeUHzaa0DIb1pbQ6RjsAhqhNAVwAaNgip8osNkpmEgQ1mZ
+         xI8hVaBt8tHn4Yqjw/+hN1F+CO0fc49hembNYpGHdvXpYTlMcD7Sk2LEU0PQ5vv2pl7+
+         PPr3fnhXlRPikuPt/u1ToB8JXDfvBf419F2u/qe4dYQkor6oq07/kS0P5Ke1CJ/G8HqA
+         ZKvP2pMJblGpiuuknAJ7nMfaTzMragYIdsPwnMxnbpoJ9JX7vCRc4p30X6asAjuX80rH
+         srgMKzu8E7Ep2VYKMRWrxK5DPg21e4StNBeDRekPIP3YhKY6TUV9X9X3jdNeS4Wva8eQ
+         ZBKA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=mime-version:content-language:accept-language:message-id:date
+         :thread-index:thread-topic:subject:cc:to:from;
+        bh=swyRjP/ILbSBnw2dSbWjTdSxBuklxboH73JJf3/qH0E=;
+        fh=UQ9YkwA/88Jo+FzrvaaIffvbOg918JQFfZPPlUSz2Rs=;
+        b=kENPgAf0WymkjX4vhn6mj+z0gtbNZhYc/BNRZwwsENmpjhl9VkS2t6wAJhad9fbDAm
+         0777SErZDtZKv4ckHHCS6oQsqzru2ttItm/31dyzeF+cLhva69emJK8Pr7zcav4e/17h
+         yJhrHZ/iErV/tWguMkPJ+1a/ByEJKM62xSn2iFenBbEcpy/U/MAtQTx2Y48JLDcHsxE6
+         wqUURtkiGa7kI9qUgki8FfwT2dcQA/e1ErvcAu/+Bxy/fNFNuB8LuKzFJQ/YY4G/dXhi
+         Mq8huLQztCm5ppp/Pfoo6QjWRjux8ZBazorSXpOwvqTh7zAqe5luy5Kr57jFPjG2y3RK
+         lu/Q==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       spf=pass (google.com: domain of sidheswar.routray@sot.pdpu.ac.in designates 209.222.82.245 as permitted sender) smtp.mailfrom=Sidheswar.Routray@sot.pdpu.ac.in
+Return-Path: <Sidheswar.Routray@sot.pdpu.ac.in>
+Received: from outbound-ip92a.ess.barracuda.com (outbound-ip92a.ess.barracuda.com. [209.222.82.245])
+        by mx.google.com with ESMTPS id af79cd13be357-907b86c5ac4si200618185a.111.2026.05.08.05.11.27
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 08 May 2026 05:12:03 -0700 (PDT)
+Received-SPF: pass (google.com: domain of sidheswar.routray@sot.pdpu.ac.in designates 209.222.82.245 as permitted sender) client-ip=209.222.82.245;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of sidheswar.routray@sot.pdpu.ac.in designates 209.222.82.245 as permitted sender) smtp.mailfrom=Sidheswar.Routray@sot.pdpu.ac.in
+Received: from pdpumail3.pdpu.ac.in (unknown [14.139.122.139]) by mx-outbound14-149.us-east-2a.ess.aws.cudaops.com; Fri, 08 May 2026 12:06:50 +0000
+Received: from MB.pdpu.ac.in ([10.30.1.35]) by mb ([10.30.1.35]) with mapi id
+ 14.03.0382.000; Fri, 8 May 2026 17:27:24 +0530
+From: Sidheswar Routray <Sidheswar.Routray@sot.pdpu.ac.in>
+To: CE22 <CE22@pdpu.ac.in>
+CC: cshod <cshod@sot.pdpu.ac.in>, CS-DyHod <CS-DyHod@pdpu.ac.in>, Aashka R
+	<Aashka.R@sot.pdpu.ac.in>, Aditya Shastri <Aditya.Shastri@sot.pdpu.ac.in>,
+	Amit Singh <Amit.Singh@sot.pdpu.ac.in>, Amitava Choudhury
+	<Amitava.Choudhury@sot.pdpu.ac.in>, Archana Nigam
+	<Archana.Nigam@sot.pdpu.ac.in>, Ashish Patel1 <Ashish.Patel1@sot.pdpu.ac.in>,
+	Ashutosh Tripathi <Ashutosh.Tripathi@sot.pdpu.ac.in>, Azriel Henry_ad
+	<Azriel.Henry_ad@sot.pdpu.ac.in>, Darshit Shah <Darshit.Shah@spt.pdpu.ac.in>,
+	Davinder Singh <Davinder.Singh@sot.pdpu.ac.in>, Debabrata Swain
+	<Debabrata.Swain@sot.pdpu.ac.in>, Hargeet Kaur <Hargeet.Kaur@sot.pdpu.ac.in>,
+	Himanshu Gajera <Himanshu.Gajera@sot.pdpu.ac.in>, Hiren Thakkar
+	<Hiren.Thakkar@sot.pdpu.ac.in>, Kalgi Gandhi <Kalgi.Gandhi@sot.pdpu.ac.in>,
+	Kaushal Shah <Kaushal.Shah@sot.pdpu.ac.in>, Ketan Sabale
+	<Ketan.Sabale@sot.pdpu.ac.in>, Komal S <Komal.S@sot.pdpu.ac.in>, "Krishna
+ Brahmbhatt" <Krishna.Brahmbhatt@sot.pdpu.ac.in>, Manish Paliwal
+	<Manish.Paliwal@sot.pdpu.ac.in>, Meera Khanna <Meera.Khanna@sot.pdpu.ac.in>,
+	Nandini Modi <Nandini.Modi@sot.pdpu.ac.in>, Nishant Doshi
+	<Nishant.Doshi@sot.pdpu.ac.in>, Payal Chaudhari
+	<Payal.Chaudhari@sot.pdpu.ac.in>, Pooja Shah <Pooja.Shah@sot.pdpu.ac.in>,
+	Punit Gupta <Punit.Gupta@sot.pdpu.ac.in>, Rahul D <Rahul.D@sot.pdpu.ac.in>,
+	Rajeev Gupta <Rajeev.Gupta@sot.pdpu.ac.in>, Rajendra Choudhary
+	<Rajendra.Choudhary@sot.pdpu.ac.in>, Riddhi Thakkar
+	<Riddhi.Thakkar@sot.pdpu.ac.in>, Rutvij Jhaveri
+	<Rutvij.Jhaveri@sot.pdpu.ac.in>, Samir Patel <Samir.Patel@sot.pdpu.ac.in>,
+	Sanjeev Dwivedi <Sanjeev.Dwivedi@sot.pdpu.ac.in>, Santanu Roy
+	<Santanu.Roy@sot.pdpu.ac.in>, Santosh Bharti <Santosh.Bharti@sot.pdpu.ac.in>,
+	Shakti Mishra <Shakti.Mishra@sot.pdpu.ac.in>, Shilpa Pandey
+	<Shilpa.Pandey@sot.pdpu.ac.in>, Shivangi Surati
+	<Shivangi.Surati@sot.pdpu.ac.in>, Sidheswar Routray
+	<Sidheswar.Routray@sot.pdpu.ac.in>, Sonam Nahar <Sonam.Nahar@sot.pdpu.ac.in>,
+	Sujit Das <Sujit.Das@sot.pdpu.ac.in>, Tanmay Bhowmik
+	<Tanmay.Bhowmik@sot.pdpu.ac.in>, Trishna Paul <Trishna.Paul@sot.pdpu.ac.in>,
+	Utkarsh Tiwari <Utkarsh.Tiwari@sot.pdpu.ac.in>, Yogesh Kumar
+	<Yogesh.Kumar@sot.pdpu.ac.in>
+Subject: Important Instructions Regarding Final CP/MP Viva
+Thread-Topic: Important Instructions Regarding Final CP/MP Viva
+Thread-Index: Adzeyb59POVkjgcrQQq8Wbz0MggtVw==
+Date: Fri, 8 May 2026 11:57:24 +0000
+Message-ID: <1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1@mb>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator:
+x-originating-ip: [10.30.10.190]
+Content-Type: multipart/mixed;
+	boundary="_004_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_"
+MIME-Version: 1.0
+X-Auto-Response-Suppress: DR, OOF, AutoReply
+X-BESS-ID: 1778241960-103733-7735-6745-7
+X-BESS-VER: 2019.1_20260409.1619
+X-BESS-Apparent-Source-IP: 14.139.122.139
+X-BESS-Parts: H4sIAAAAAAACA02NOwrDQAxE77K1C0mWbMtXCSlWH2MISYo4EAi+e7awIc0wDL
+	w3l2/Jz1bmsrXsyvNVZhpVWlvbOFH4QBDOar0LqAWHLByQ1Zy07N3Jr9v95EGQDoGTDQ
+	sZYfLIU/Yo6miZ4jAIgP8J3o/bKWBUPASqDUap0VsQMFlNzXZv6ITAUPbrD3zqvNjDAA
+	AA
+X-BESS-Spam-Status: SCORE=0.32 using account:ESS71827 scores of QUARANTINE_LEVEL=0.0 KILL_LEVEL=3.0 tests=BSF_SC0_SA_TO_FROM_DOMAIN_MATCH, HTML_MESSAGE, RDNS_NONE_DOM_TO_DOM, MIME_DOC_AO_NAME4, RDNS_NONE
+X-BESS-Spam-Report: Code version 3.2, rules version 3.2.2.273115 [from cloudscan21-
+	9.us-east-2b.ess.aws.cudaops.com]
+	Rule breakdown below
+	 pts rule name              description
+	---- ---------------------- --------------------------------
+	0.01 BSF_SC0_SA_TO_FROM_DOMAIN_MATCH META: Sender Domain Matches Recipient Domain 
+	0.00 HTML_MESSAGE           BODY: HTML included in message 
+	0.01 RDNS_NONE_DOM_TO_DOM   META: Custom rule RDNS_NONE_DOM_TO_DOM 
+	0.20 MIME_DOC_AO_NAME4      META: Custom Rule MIME_DOC_AO_NAME4 
+	0.10 RDNS_NONE              META: Delivered to trusted network by a host with no rDNS 
+Authentication-Results: mx-outbound14-149.us-east-2a.ess.aws.cudaops.com; dkim=none header.d=; dmarc=none header.from=Sidheswar.Routray@sot.pdpu.ac.in
+X-BESS-Spam-Score: 0.32
+X-BESS-BRTS-Status:1
+X-BESS-Info: H4sIAAAAAAACA6tWSslMUbIyNDWxNDTQUUrJU7JSKs4v0StIKSjVS0zWy8xTqgU
+	Ah61RsiQAAAA=
+
+--_004_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_
+Content-Type: multipart/alternative;
+	boundary="_000_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_"
+
+--_000_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Dear Students,
+
+Please note the following important instructions regarding the Final CP/MP =
+Viva:
+
+1.      All students must prepare the final project report and other requir=
+ed documents as per the given checklist and submit them to their respective=
+ supervisors for verification by 14th May 2026.
+
+2.      Once verified, each student must take printouts of two hard-bound c=
+opies of the final project report - one for personal record and one for the=
+ supervisor. The hard-bound report cover page must be in Blue colour with G=
+olden embossing.
+
+3.      For MP students, only one hard-bound copy for the supervisor needs =
+to be submitted for the entire group, while each student must maintain one =
+personal hard-bound copy. In the personal copy, the respective student's na=
+me should appear in the first position, and the names of the other group me=
+mbers should follow.
+
+4.      All students must obtain the signature of the supervisor on all har=
+d copies of the documents and the checklist before the Final Viva.
+
+5.      Students must upload the soft copies of the verified documents as p=
+er the checklist by 18th May 2026. (The upload link will be shared shortly.)
+
+6.      The Similarity Index (Plagiarism Report) and AI Plagiarism Report o=
+f the project report must be below 10%. The summary pages of both reports m=
+ust be attached at the end of the final project report.
+
+7.      Students who have not completed their internship by 19th May 2026 m=
+ust submit either: a certificate of progress, or an email confirmation from=
+ the industry supervisor clearly mentioning the expected date of completion.
+
+8.      The viva will begin at 9:00 AM sharp. All students must be present =
+at the venue well in advance. The detailed schedule and venue will be share=
+d shortly.
+
+9.      Each student must prepare a PowerPoint presentation covering the fo=
+llowing:
+
+*                Problem Statement
+
+*                Objectives
+
+*                Methodology
+
+*                Results
+
+*                Conclusions
+
+*                Research Outcomes (Publications/Patents, if any)
+
+*                References
+
+10.  Please note the following details while preparing the final report: Th=
+e degree name should be written as: BACHELOR OF TECHNOLOGY IN COMPUTER ENGI=
+NEERING. The department name should be written as: COMPUTER SCIENCE & ENGIN=
+EERING
+
+Please adhere to all the above guidelines carefully to ensure a smooth and =
+successful viva process.
+
+For any queries, kindly contact your respective supervisor.
+Dr. Sidheswar Routray
+Assistant Professor,
+Department of Computer Engineering,
+School of Technology,
+Pandit Deendayal Energy University,
+Gandhinagar, Gujarat 382007.
+https://linkprotect.cudasvc.com/url?a=3Dhttps%3a%2f%2fwww.pdpu.ac.in&c=3DE,=
+1,RY3oqFLSRWIHTSBHWhsaevtE8LGHIs-y3caPq4wYipalWnAY4LcSdUIX41bWiT6WirPt7-rch=
+EQ9Zu708riId2zJ30z4_eFt-IKsR97V&typo=3D1<https://linkprotect.cudasvc.com/ur=
+l?a=3Dhttp%3a%2f%2fwww.pdpu.ac.in%2f&c=3DE,1,lNLqTgOcu3fSn_5lqADG02mc2d2kui=
+uRkaOo6Enr0EsjosQRbaFm7fTtu2hTkQNl1jCPgf3BJaT2kC7MUUmHEmu0YvigOSojZsq7vKIFB=
+1kPZrM,&typo=3D1>
+Email: sidheswar.routray@sot.pdpu.ac.in<mailto:sidheswar.routray@sot.pdpu.a=
+c.in>
+Contact No: +91 9861595680
+
+
+--_000_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii">
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	mso-fareast-language:EN-US;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+p
+	{mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+span.EmailStyle18
+	{mso-style-type:personal-compose;
+	font-family:"Calibri",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;
+	mso-fareast-language:EN-US;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:29034198;
+	mso-list-template-ids:-574427178;}
+@list l0:level1
+	{mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+@list l0:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1
+	{mso-list-id:724988335;
+	mso-list-type:hybrid;
+	mso-list-template-ids:963005668 1074331663 1074331673 1074331675 107433166=
+3 1074331673 1074331675 1074331663 1074331673 1074331675;}
+@list l1:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l2
+	{mso-list-id:818032795;
+	mso-list-type:hybrid;
+	mso-list-template-ids:694432554 1074331663 1074331673 1074331675 107433166=
+3 1074331673 1074331675 1074331663 1074331673 1074331675;}
+@list l2:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l2:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l2:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l3
+	{mso-list-id:931623991;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1627429204 1074331649 1074331651 1074331653 10743316=
+49 1074331651 1074331653 1074331649 1074331651 1074331653;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l4
+	{mso-list-id:1326516352;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-2079190546 -577340136 1074331651 1074331653 1074331=
+649 1074331651 1074331653 1074331649 1074331651 1074331653;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:6.55pt;
+	font-family:Symbol;}
+@list l4:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l4:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l4:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l4:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l4:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l4:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l4:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l4:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-IN" link=3D"#0563C1" vlink=3D"#954F72">
+<div class=3D"WordSection1">
+<p><span style=3D"font-size:11.0pt">Dear Students,<o:p></o:p></span></p>
+<p><span style=3D"font-size:11.0pt">Please note the following important ins=
+tructions regarding the Final CP/MP Viva:<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">1.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">All student=
+s must prepare the final project report and other required documents as per=
+ the given checklist and submit them to their respective supervisors for ve=
+rification by 14th May 2026.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">2.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Once verifi=
+ed, each student must take printouts of two hard-bound copies of the final =
+project report &#8212; one for personal record and one for the supervisor. =
+The hard-bound report cover page must be
+ in Blue colour with Golden embossing.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">3.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">For MP stud=
+ents, only one hard-bound copy for the supervisor needs to be submitted for=
+ the entire group, while each student must maintain one personal hard-bound=
+ copy. In the personal copy, the respective
+ student&#8217;s name should appear in the first position, and the names of=
+ the other group members should follow.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">4.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">All student=
+s must obtain the signature of the supervisor on all hard copies of the doc=
+uments and the checklist before the Final Viva.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">5.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Students mu=
+st upload the soft copies of the verified documents as per the checklist by=
+ 18th May 2026. (The upload link will be shared shortly.)<o:p></o:p></span>=
+</p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">6.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">The Similar=
+ity Index (Plagiarism Report) and AI Plagiarism Report of the project repor=
+t must be below 10%. The summary pages of both reports must be attached at =
+the end of the final project report.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">7.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Students wh=
+o have not completed their internship by 19th May 2026 must submit either: =
+a certificate of progress, or an email confirmation from the industry super=
+visor clearly mentioning the expected
+ date of completion.<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">8.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">The viva wi=
+ll begin at 9:00 AM sharp. All students must be present at the venue well i=
+n advance. The detailed schedule and venue will be shared shortly.<o:p></o:=
+p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">9.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Each studen=
+t must prepare a PowerPoint presentation covering the following:<o:p></o:p>=
+</span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Problem Sta=
+tement<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Objectives<=
+o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Methodology=
+<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Results<o:p=
+></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Conclusions=
+<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Research Ou=
+tcomes (Publications/Patents, if any)<o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:6.55pt;mso-list:l4 level1 lfo5">=
+<![if !supportLists]><span style=3D"font-size:11.0pt;font-family:Symbol"><s=
+pan style=3D"mso-list:Ignore">&middot;<span style=3D"font:7.0pt &quot;Times=
+ New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">References<=
+o:p></o:p></span></p>
+<p style=3D"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3"=
+><![if !supportLists]><span style=3D"font-size:11.0pt"><span style=3D"mso-l=
+ist:Ignore">10.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:11.0pt">Please note=
+ the following details while preparing the final report: The degree name sh=
+ould be written as: BACHELOR OF TECHNOLOGY IN COMPUTER ENGINEERING. The dep=
+artment name should be written as:
+ COMPUTER SCIENCE &amp; ENGINEERING<o:p></o:p></span></p>
+<p><span style=3D"font-size:11.0pt">Please adhere to all the above guidelin=
+es carefully to ensure a smooth and successful viva process.<o:p></o:p></sp=
+an></p>
+<p><span style=3D"font-size:11.0pt">For any queries, kindly contact your re=
+spective supervisor.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><b><span style=3D"font-family:&quot;Times New Roman&=
+quot;,serif;mso-fareast-language:EN-IN">Dr. Sidheswar Routray</span></b><b>=
+<span style=3D"font-family:&quot;Times New Roman&quot;,serif;mso-fareast-la=
+nguage:EN-IN">
+<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Assistant Professor,
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Department of Computer Engineering,</s=
+pan><span style=3D"font-family:&quot;Times New Roman&quot;,serif;mso-fareas=
+t-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">School of Technology,&nbsp;</span><spa=
+n style=3D"font-family:&quot;Times New Roman&quot;,serif;mso-fareast-langua=
+ge:EN-IN">
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Pandit Deendayal Energy University</sp=
+an><span style=3D"font-family:&quot;Times New Roman&quot;,serif;mso-fareast=
+-language:EN-IN">,<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Gandhinagar, Gujarat
+</span><span style=3D"font-family:&quot;Times New Roman&quot;,serif;backgro=
+und:white;mso-fareast-language:EN-IN">382007</span><span style=3D"font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-fareast-language:EN-IN">.</span><s=
+pan style=3D"font-family:&quot;Times New Roman&quot;,serif;mso-fareast-lang=
+uage:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><a href=3D"https://linkprotect.cudasvc.com/url?a=3Dh=
+ttp%3a%2f%2fwww.pdpu.ac.in%2f&c=3DE,1,AZRg4b12IdNIAmyPwU3YwrSeidoDcQCrpBzaR=
+3ilqDssysKbz18DYS17apQXIs5NVoOtDEDIlPBOjTTXOuorkUAPrrzkBVrZW_dAHkawJGh4TK8,=
+&typo=3D1"><span style=3D"font-family:&quot;Times New Roman&quot;,serif;col=
+or:blue;mso-fareast-language:EN-IN">www.pdpu.ac.in</span></a><span style=3D=
+"font-family:&quot;Times New Roman&quot;,serif;mso-fareast-language:EN-IN">=
+&nbsp;
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Email:
+</span><a href=3D"mailto:sidheswar.routray@sot.pdpu.ac.in"><span style=3D"f=
+ont-family:&quot;Times New Roman&quot;,serif;color:blue;mso-fareast-languag=
+e:EN-IN">sidheswar.routray@sot.pdpu.ac.in</span></a><span style=3D"font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-fareast-language:EN-IN">&nbsp;
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Times New Roman&quo=
+t;,serif;mso-fareast-language:EN-IN">Contact No: &#43;91 9861595680
+</span><span style=3D"mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
+</body>
+</html>
+
+--_000_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_--
+
+--_004_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document;
+	name="Check_List_CP_MP.docx"
+Content-Description: Check_List_CP_MP.docx
+Content-Disposition: attachment; filename="Check_List_CP_MP.docx"; size=24191;
+	creation-date="Mon, 20 Apr 2026 12:57:42 GMT";
+	modification-date="Thu, 03 Apr 2025 10:49:52 GMT"
+Content-Transfer-Encoding: base64
+
+UEsDBBQABgAIAAAAIQCUZeTvkgEAAK4HAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADM
+lU1Lw0AQhu+C/yHsVZptK4hI0x78OGrBCl63m0m7uF/sTr/+vZOkBpFq1LbiJZDMzPs+O9mdHYzW
+RidLCFE5m7Fe2mUJWOlyZWcZe5rcdS5ZElHYXGhnIWMbiGw0PD0ZTDYeYkLVNmZsjuivOI9yDkbE
+1HmwFClcMALpNcy4F/JFzID3u90LLp1FsNjBUoMNBzdQiIXG5HZNn2uSADqy5LpOLL0yJrzXSgqk
+OF/a/INLZ+uQUmWVE+fKxzNKYHynQxn53GBb90CtCSqHZCwC3gtDWXzlQs5zJxeGKtOvZXZwuqJQ
+Epr6Us0HJyFG6rnRaRMxQtk3/l0cchHRmWejuUIw4+B87O2N04iWehBQQdPDbzL0/wHD+V8zVHvC
+LswUAv3Fw2+KRroVIuJGQzw8Qa3bbg+IVHAMgK1yK8IKpo9Ho3gn3gpSkO9ETDUcHqORboVAGslQ
+P/efDpXMV5aUWR1AGvHhF8t+m+Fldcd/6+Q1jiS99/qgvB5yyH/qXU+LAw2dHea8um2HrwAAAP//
+AwBQSwMEFAAGAAgAAAAhAJlVfgX+AAAA4QIAAAsACAJfcmVscy8ucmVscyCiBAIooAACAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACskk1LAzEQ
+hu+C/yHMvTvbKiLS3V5E6E1k/QFDMvuBmw+Sqbb/3iiKLtS1hx4zeefJM0PWm70d1SvHNHhXwbIo
+QbHT3gyuq+C5eVjcgkpCztDoHVdw4ASb+vJi/cQjSW5K/RCSyhSXKuhFwh1i0j1bSoUP7PJN66Ml
+ycfYYSD9Qh3jqixvMP5mQD1hqq2pIG7NFajmEPgUtm/bQfO91zvLTo48gbwXdobNIsTcH2XI06iG
+YsdSgfH6MZcTUghFRgMeN1qdbvT3tGhZyJAQah953ucjMSe0POeKpokfmzcfDZqv8pzN9Tlt9C6J
+t/+s5zPzrYSTj1m/AwAA//8DAFBLAwQUAAYACAAAACEAfhvmWygBAABgBQAAHAAIAXdvcmQvX3Jl
+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
+AAAAAAAAAAAAywMAAF9yZWxzLy5yZWxzUEsBAi0AFAAGAAgAAAAhAH4b5lsoAQAAYAUAABwAAAAA
+AAAAAAAAAAAA+gYAAHdvcmQvX3JlbHMvZG9jdW1lbnQueG1sLnJlbHNQSwECLQAUAAYACAAAACEA
+3z9ua4gRAADEGgEAEQAAAAAAAAAAAAAAAABkCQAAd29yZC9kb2N1bWVudC54bWxQSwECLQAUAAYA
+CAAAACEAqlIl3yMGAACLGgAAFQAAAAAAAAAAAAAAAAAbGwAAd29yZC90aGVtZS90aGVtZTEueG1s
+UEsBAi0AFAAGAAgAAAAhADH/vJfKBAAArwwAABEAAAAAAAAAAAAAAAAAcSEAAHdvcmQvc2V0dGlu
+Z3MueG1sUEsBAi0AFAAGAAgAAAAhAK9uJH88AQAAIwIAABgAAAAAAAAAAAAAAAAAaiYAAGN1c3Rv
+bVhtbC9pdGVtUHJvcHMyLnhtbFBLAQItABQABgAIAAAAIQCzUNUKDQEAAJIBAAATAAAAAAAAAAAA
+AAAAAAQoAABkb2NQcm9wcy9jdXN0b20ueG1sUEsBAi0AFAAGAAgAAAAhAITcjnk+AQAASwIAABMA
+AAAAAAAAAAAAAAAASioAAGN1c3RvbVhtbC9pdGVtMi54bWxQSwECLQAUAAYACAAAACEASwYiC/MA
+AABPAQAAGAAAAAAAAAAAAAAAAADhKwAAY3VzdG9tWG1sL2l0ZW1Qcm9wczEueG1sUEsBAi0AFAAG
+AAgAAAAhAHQ/OXrCAAAAKAEAAB4AAAAAAAAAAAAAAAAAMi0AAGN1c3RvbVhtbC9fcmVscy9pdGVt
+MS54bWwucmVsc1BLAQItABQABgAIAAAAIQBcliciwgAAACgBAAAeAAAAAAAAAAAAAAAAADgvAABj
+dXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwECLQAUAAYACAAAACEAe/MCo8MAAAAoAQAA
+HgAAAAAAAAAAAAAAAAA+MQAAY3VzdG9tWG1sL19yZWxzL2l0ZW0zLnhtbC5yZWxzUEsBAi0AFAAG
+AAgAAAAhAAibYyXaAQAA2wMAABAAAAAAAAAAAAAAAAAARTMAAGRvY1Byb3BzL2FwcC54bWxQSwEC
+LQAUAAYACAAAACEAvYRiI5AAAADbAAAAEwAAAAAAAAAAAAAAAABVNgAAY3VzdG9tWG1sL2l0ZW0x
+LnhtbFBLAQItABQABgAIAAAAIQCmpA6S1wEAALMFAAASAAAAAAAAAAAAAAAAAD43AAB3b3JkL2Zv
+bnRUYWJsZS54bWxQSwECLQAUAAYACAAAACEAv4qnNy4JAAAJNgAAEwAAAAAAAAAAAAAAAABFOQAA
+Y3VzdG9tWG1sL2l0ZW0zLnhtbFBLAQItABQABgAIAAAAIQAVd0xItQEAAH0EAAAYAAAAAAAAAAAA
+AAAAAMxCAABjdXN0b21YbWwvaXRlbVByb3BzMy54bWxQSwECLQAUAAYACAAAACEAedLvr+cCAAAl
+DQAAEgAAAAAAAAAAAAAAAADfRAAAd29yZC9udW1iZXJpbmcueG1sUEsBAi0AFAAGAAgAAAAhAHDr
+NbkHDAAABXQAAA8AAAAAAAAAAAAAAAAA9kcAAHdvcmQvc3R5bGVzLnhtbFBLAQItABQABgAIAAAA
+IQDzPWsLhQEAAKADAAAUAAAAAAAAAAAAAAAAACpUAAB3b3JkL3dlYlNldHRpbmdzLnhtbFBLAQIt
+ABQABgAIAAAAIQCTTELklgEAACMDAAARAAAAAAAAAAAAAAAAAOFVAABkb2NQcm9wcy9jb3JlLnht
+bFBLBQYAAAAAFgAWALsFAACuWAAAAAA=
+
+--_004_1302826B246EED4B96DF0E1B2D4CDA1762BDDDC1mb_--

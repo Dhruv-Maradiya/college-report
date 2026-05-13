@@ -1,0 +1,49 @@
+\chapter{Conclusions and Future Work}
+\label{Chapter 5}
+
+\section{Conclusion}
+This report has documented a six-month engineering internship at Ignosis during which I contributed to a production multi-tenant AI-Based Collections Platform. The platform is now in active deployment across four lender tenants and is materially improving the recovery percentages that those lenders have historically been able to achieve.
+
+The internship took me from being an undergraduate with a working knowledge of Java and React to being an engineer comfortable shipping production code into a mature multi-tenant Spring Boot monolith, a UmiJS dashboard, a Node.js automation library and an Electron desktop client. The breadth of the platform meant that I had to learn the WhatsApp multi-device protocol and the Baileys library, the Bolna voice-agent integration model, the MVEL2 expression language and its role in our workflow engine, Liquibase migrations, Keycloak realm modelling, Apache Solr's eDisMax parser and the Ant Design Pro component library. Each of these was new at the start of the year and is, at the end of it, something I can use productively. Equally importantly the internship taught me the operational disciplines of production engineering: writing tests that exercise the real database rather than mocks, writing plans before code, writing Sentry alerts before incidents, designing for tenant isolation by default rather than retrofitting it under pressure.
+
+The headline result of the work is captured in Table~\ref{tab:headline} of Chapter~4: the Bucket 0 collection rate moved from 64 percent to 85 percent, the percentage of cases recovered within the first five days of a cycle moved from 38 percent to 70 percent, and the multi-channel cumulative contact rate reached 96 percent. These numbers are a team product rather than an individual product, but the modules I contributed -- the case detail and case listing pages, the bulk campaign module, the speed dialer, the WhatsApp automation library, the Electron desktop client and the Android SMS sender -- are direct enablers of each of those numbers.
+
+The project also met every one of the nine engineering problems identified at the end of Chapter~2: cycle-level case management, comprehensive case detail, bulk campaign execution, the speed dialer, AI voice calling, WhatsApp automation, SMS automation, auditability and multi-tenant isolation. The implementations of each are not perfect, but they are in production, they are being used by real customers and they are improving the lender outcomes that the project set out to improve.
+
+\section{Reflections on What Could Have Been Done Better}
+A few aspects of the work could, with hindsight, have been handled better.
+
+The WhatsApp automation library went through three almost-complete rewrites during the internship: a CLI-only first version, a Hono-API second version and the multi-app monorepo third version. Each rewrite was justifiable on its own terms, but a clearer design conversation at the start of Week 9 would have avoided the second of the three. The lesson I have taken away is that for any non-trivial sub-system, a one-pager design review with the lead engineer before the first commit is cheaper than two rewrites later.
+
+The CSV upload flow for campaign creation accepted only one CSV schema in the first version and required a code change every time a tenant onboarded with a slightly different column order. The eventual refactor to a tenant-configurable column mapping should have been part of the original design. Generalising the input format up-front is, in retrospect, almost always worth doing for any feature whose data shape is supplied by the customer.
+
+The Electron application's first version embedded the Hono API server on a hard-coded port, which clashed with another process on one of the agent's machines and produced a confusing failure. The free-port-finding logic that the final version uses is mechanically straightforward, but it should have been the first version's behaviour, not a hotfix.
+
+\section{Future Work}
+Several capabilities are on the engineering team's roadmap for the next two quarters. Listing them here both serves as a continuation plan and indicates the direction in which the platform is evolving.
+
+\subsection{Multi-Language Voice Agents}
+The Bolna agent currently runs in Indian English with code-switching into Hindi. The next phase will introduce dedicated Tamil, Telugu, Marathi, Gujarati and Bengali agents, with the agent selected per case based on either the customer's stated preference or a language detection step at the start of the conversation. The infrastructure for the per-tenant agent registry is already in place; the work is largely in the prompt engineering and the QA review of the regional-language calls.
+
+\subsection{AA-Driven Adaptive Workflows}
+Today the workflow engine is configured per tenant and runs the same workflow for every case in that tenant. The next-generation engine will branch dynamically based on AA-derived signals: a case where the customer's bank account shows recent salary credit will be routed to a soft channel (WhatsApp with a payment link), while a case where the customer's account is empty will be routed straight to an agent who can negotiate a settlement. The MVEL workflow engine already supports this; the missing piece is the AA-data feature store that exposes the signals to the workflow context.
+
+\subsection{Real-Time Sentiment Analysis}
+Bolna emits a per-turn transcript with the recorded audio. Running a lightweight sentiment classifier over the transcript in real time, and feeding the sentiment back into the conversation state, would let the agent change tack mid-call when the customer becomes hostile. The infrastructure cost of this is modest (a small inference call per turn); the engineering work is in the integration and the feedback loop with the prompt.
+
+\subsection{Predictive Prioritisation Model}
+The Python analysis described in Section~3.11 was a one-off. Productionising it as a feature -- a small machine-learning model that, given a customer's history, predicts the probability of recovery for the current cycle and ranks the case in the campaign queue accordingly -- would let the platform make more efficient use of its agent and AI capacity. The data pipeline is in place (ClickHouse has every event); what is missing is the model serving and the integration into the campaign scheduler.
+
+\subsection{WhatsApp Number Health Scoring}
+The current ban-detection logic is reactive. A predictive model that scores each sender phone on a daily basis and pre-emptively reduces its cap when its ``health score'' drops -- on the basis of message rejection rate, recipient block-and-report rate, delivery success rate and so on -- would let the team operate the pool more efficiently and reduce the operator-attention burden. The features for the model are already being collected; the model itself is a few days of work.
+
+\subsection{Lender-Side Allocation Self-Service}
+The lender-side allocation upload is today operated through a CSV that a customer-success engineer at Ignosis handles manually. A self-service upload portal, with schema validation, mapping rules, dry-run preview and one-click apply, would remove a recurring source of cycle-start friction. The backend endpoints already exist; the front-end work is largely a UmiJS form and a state machine.
+
+\subsection{Voice Agent Evaluation Pipeline}
+A continuous evaluation pipeline that runs a fixed corpus of test conversations against the Bolna agent every time a prompt changes would catch regressions before they reach production. The pipeline is half-built already (a separate \texttt{feat/agents-eval} branch). Finishing it is a high-priority item for the next quarter.
+
+\section{Closing Note}
+On a personal note, the internship has been the single most useful piece of engineering practice in my undergraduate degree. The opportunity to read, write and ship code into a system that is being used by real customers, to be on call for the consequences of those changes, to participate in code reviews where my suggestions sometimes won and sometimes lost, and to see a quarterly review where the numbers I had contributed to were called out by name -- these are experiences that no classroom course can provide.
+
+I am grateful to Ignosis, to my industry supervisor Mr.~Rahi Shah, to my PDEU supervisor Dr.~Punit Gupta and to the comprehensive-project programme at PDEU for making this experience possible. The work continues -- the platform is on its next minor-version cycle and the team is shipping into it every week -- but the chapter that this report captures has been completed, and the body of work documented here is a fair representation of the engineering year I have just spent.

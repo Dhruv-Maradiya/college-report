@@ -1,0 +1,91 @@
+\chapter*{Appendix A: Selected Source-Code Listings}
+\addcontentsline{toc}{chapter}{Appendix A: Selected Source-Code Listings}
+\markboth{Appendix A}{Appendix A}
+
+This appendix collects a handful of code excerpts referenced in the main text. They are abridged for readability; the complete files are tracked in the \texttt{collection-orchestrator} and \texttt{collection-scripts} GitLab repositories.
+
+\section*{A.1 Tenant Context Propagation Across Asynchronous Boundaries}
+
+\begin{lstlisting}[caption={Asynchronous template that propagates the tenant ThreadLocal.}]
+public class AsyncTemplate {
+  private final Executor executor;
+
+  public CompletableFuture<Void> runAsync(Runnable work) {
+    final String tenantId = TenantContext.get();
+    return CompletableFuture.runAsync(() -> {
+      try {
+        TenantContext.set(tenantId);
+        work.run();
+      } finally {
+        TenantContext.clear();
+      }
+    }, executor);
+  }
+}
+\end{lstlisting}
+
+\section*{A.2 Worker Loop for a WhatsApp Sender}
+
+\begin{lstlisting}[caption={Per-sender worker loop, abridged from messaging/sender.ts.}]
+while (true) {
+  if (!isWithinActiveHours(config.timing)) {
+    await sleep(msUntilActiveHours(config.timing));
+    continue;
+  }
+  if (tracker.getSenderState(senderPhone).sentToday >= dailyLimit) {
+    return;
+  }
+  const pull = queue.pullFor(senderPhone);
+  if (pull.kind === 'done') break;
+  if (pull.kind === 'wait') { await sleep(30_000); continue; }
+  await sendWithPresenceSimulation(pull.contact, sock, template);
+  if (++sentInBatch >= currentBatchSize) {
+    await sleep(getBreakDuration());
+    sentInBatch = 0;
+    currentBatchSize = getBatchSize();
+  }
+}
+\end{lstlisting}
+
+\section*{A.3 Message Body Micro-Variation}
+
+\begin{lstlisting}[caption={Micro-variation applied to every outbound WhatsApp body.}]
+function applyMicroVariations(text: string): string {
+  if (Math.random() < 0.3) {
+    text = text.endsWith('.') ? text.slice(0, -1) : text + '.';
+  }
+  if (Math.random() < 0.2) {
+    const pos = randomInt(1, text.length - 1);
+    text = text.slice(0, pos) + ZWSP + text.slice(pos); // U+200B
+  }
+  return text;
+}
+\end{lstlisting}
+
+\section*{A.4 Bolna Webhook Handler}
+
+\begin{lstlisting}[caption={Webhook handler for the Bolna call-status callback.}]
+@PostMapping(value = "/bolna-webhook")
+public ResponseEntity<Void> handle(@RequestBody BolnaWebHookRequest payload) {
+  voiceCallWebhookProcessor.applyTerminalStatus(payload);
+  bolnaCallMetricsService.emit(payload);
+  return ResponseEntity.ok().build();
+}
+\end{lstlisting}
+
+\section*{A.5 Liquibase Migration for the QA Issue Table}
+
+\begin{lstlisting}[caption={Liquibase changeset for the qa\_issue table.}]
+<changeSet id="2026-04-22-qa-issue" author="dhruv">
+  <createTable tableName="qa_issue">
+    <column name="id" type="UUID"><constraints primaryKey="true"/></column>
+    <column name="iss_id" type="VARCHAR(20)"><constraints unique="true"/></column>
+    <column name="tenant_id" type="VARCHAR(64)"><constraints nullable="false"/></column>
+    <column name="call_id" type="UUID"><constraints nullable="false"/></column>
+    <column name="category" type="VARCHAR(64)"/>
+    <column name="status" type="VARCHAR(32)"/>
+    <column name="priority" type="VARCHAR(16)"/>
+    <column name="created_at" type="TIMESTAMP"/>
+  </createTable>
+</changeSet>
+\end{lstlisting}
