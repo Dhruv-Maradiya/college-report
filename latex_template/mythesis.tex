@@ -32,6 +32,11 @@
 
 \usepackage[a4paper, top=1in, bottom=1in, left=1.5in, right=1in]{geometry}
 
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{15pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-30pt}{20pt}
+
 \pagestyle{plain}
 
 \usepackage[hidelinks]{hyperref}
@@ -119,7 +124,8 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 \addcontentsline{toc}{chapter}{Abstract}
 \clearpage
 
-\addcontentsline{toc}{chapter}{Contents}
+\renewcommand{\contentsname}{Index}
+\addcontentsline{toc}{chapter}{Index}
 \tableofcontents
 \clearpage
 
@@ -141,6 +147,7 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 \input{chapter3}
 \input{chapter4}
 \input{chapter5}
+\input{chapter6}
 
 \input{appendixA.tex}
 

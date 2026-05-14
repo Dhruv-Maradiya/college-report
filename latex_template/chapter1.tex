@@ -1,7 +1,7 @@
 \chapter{Introduction}
 \label{Chapter 1}
 
-\section{Background}
+\section{Introduction / Prologue / Background}
 Retail lending in India has grown dramatically over the last decade. Personal loans, two-wheeler loans, consumer-durable loans, gold loans, credit-card revolving balances, salary advances and a long tail of buy-now-pay-later style products are now offered by a mix of public-sector banks, private banks, small finance banks, non-banking financial companies (NBFCs) and a rapidly multiplying set of digital-only fintech lenders. The flip side of growth in originations is growth in delinquencies. A small but non-trivial percentage of every disbursed cohort fails to pay an installment on or before the due date, and the lender is obliged by Reserve Bank of India (RBI) policy and by basic prudence to chase those installments before the account is allowed to slide into the non-performing-asset bucket.
 
 The chasing of overdue installments is what the industry calls ``collections''. Once an account is more than one day past due (DPD), it enters a structured pipeline of follow-up actions whose intensity and tone escalate with the number of days the account remains unpaid. The classical bucketing in Indian retail collections is shown in Table~\ref{tab:dpd-buckets}.
@@ -23,40 +23,9 @@ NPA      & 120+ days    & Settlement, legal action \\
 \end{tabular}
 \end{table}
 
-For most retail products, the recovery rate falls off sharply as the bucket deepens. A loan that is collected in Bucket 0 is recovered cheaply, requires almost no negotiation, does not need any provisioning hit on the lender's balance sheet and rarely produces a customer complaint. A loan that drifts into Bucket 3 or beyond is materially more expensive to recover, often requires settlement at a discount, consumes legal team hours and erodes the customer relationship. The economic case for early-bucket recovery is therefore overwhelming, and every lender invests disproportionate effort in trying to get accounts cured as early in their delinquency life as possible.
+For most retail products the recovery rate falls off sharply as the bucket deepens. A loan collected in Bucket~0 is recovered cheaply, requires almost no negotiation and does not need a provisioning hit on the lender's balance sheet; a loan that drifts into Bucket~3 or beyond is materially more expensive, often requires settlement at a discount and erodes the customer relationship. The economic case for early-bucket recovery is therefore overwhelming. Operationally, however, early-bucket follow-up is hard at scale: a lender with a hundred thousand active retail loans can easily have eight to twelve thousand accounts in Bucket~0 on any given day, and each needs a contact attempt within a tight cycle. Lenders either build large in-house collections teams or, more commonly, outsource the recovery work in monthly batches to specialised collection agencies who keep a percentage of the recovered amount as commission.
 
-Operationally, however, early-bucket follow-up is hard at scale. A lender with a hundred thousand active retail loans can easily have eight to twelve thousand accounts in Bucket 0 on any given day. Each of those accounts needs a contact attempt -- a phone call, a SMS reminder, a WhatsApp nudge, sometimes a personal visit -- within a tight cycle so that the customer pays before the next cut-off date and the bucket statistics do not deteriorate. To do this, lenders either build large in-house collections teams or, more commonly, outsource the recovery work in monthly batches to specialised collection agencies who keep a percentage of the recovered amount as their commission.
-
-\section{The Industry: Ignosis}
-The internship that produced the work documented in this report was carried out at Ignosis, a Bengaluru-and-Ahmedabad-headquartered fintech infrastructure company. Ignosis is primarily known in the Account Aggregator (AA) ecosystem -- it is one of the larger Financial Information Users (FIU) building consented data pipelines for underwriting, fraud detection and personal financial management on top of the RBI-regulated AA framework. Over the last eighteen months, the firm has used its existing relationships with lenders to layer a second product onto its platform: a collections suite that runs on the same multi-tenant infrastructure, reuses the same Keycloak identity stack and the same Solr search backbone, and integrates AA-pulled bank-statement data into collection prioritisation.
-
-I joined the company as a comprehensive-project intern in December 2025 and worked there full-time through May 2026. The engineering team is split into two product pods -- AA / FIU and Collections -- with several engineers, like me, contributing across both. Day-to-day work happens in two GitLab repositories: \texttt{collection-orchestrator}, the Spring Boot backend plus React dashboards plus Python tooling that powers the collections product; and \texttt{collection-scripts}, the TypeScript / Node.js monorepo that contains the WhatsApp automation library, the Electron desktop client, the Android SMS sender and a number of operational scripts.
-
-\section{Title of the Project}
-The title of this comprehensive project is \textbf{``AI-Based Collections Platform''}. The platform is a multi-tenant web application that provides:
-\begin{itemize}
-\item A case management dashboard for human agents.
-\item A bulk campaign module that wraps thousands of cases into a single executable run.
-\item An AI voice calling engine that runs autonomously, without an agent in the loop.
-\item Multi-channel outreach automation across WhatsApp and SMS.
-\item Analytics on contact rates, agent productivity, call dispositions and recovery percentages.
-\end{itemize}
-
-\section{Problem Statement}
-The collections function for a typical Indian retail lender, in the absence of a centralised software platform, suffers from a small number of structural problems that compound on each other:
-
-\begin{enumerate}
-\item \textbf{Manual case allocation.} The lender hands a CSV or Excel file of delinquent accounts to the agency at the start of every monthly cycle. The agency manager then distributes those cases by hand across the agents on the floor. The mapping is opaque to the lender, hard to audit and hard to reproduce.
-\item \textbf{Single-channel outreach.} Agents reach for the desk phone first; if the customer does not pick up the phone they may or may not also send a SMS. There is no orchestrated follow-up across phone, WhatsApp and SMS, which means many customers are never reached on the channel they are likely to respond on.
-\item \textbf{Agent idle time.} Agents spend a significant fraction of their working day searching for the next case in a spreadsheet, dialling a number manually and reading the customer's history before each call. The actual conversation is only a fraction of the working minute.
-\item \textbf{No after-hours coverage.} A human agent's working day ends at 6 PM or 7 PM. After that the lender effectively has no contact channel even though many salaried customers are most reachable in the late evening.
-\item \textbf{No structured measurement.} Recovery rates are reported as a single number at month-end. Lenders cannot inspect bucket-level conversion, channel-level effectiveness or agent-level productivity in any meaningful way.
-\item \textbf{Single-attempt deliverability.} WhatsApp and SMS gateways available through business APIs throttle aggressively, charge per message and are subject to template-approval delays. SIM-based outreach from real consumer-grade numbers has materially higher deliverability but no off-the-shelf platform exposes that capability to the collections team.
-\end{enumerate}
-
-The problem statement of this project, in compact form, can therefore be stated as:
-
-\textit{``Design and contribute to a centralised, multi-tenant collections platform that improves contact rate, agent throughput and after-hours coverage by integrating AI voice calling and multi-channel outreach across WhatsApp and SMS into a single case management workflow, while preserving end-to-end auditability and supporting bulk campaign execution at the scale of a typical monthly allocation.''}
+The internship that produced the work documented in this report was carried out at Ignosis, a fintech infrastructure company best known in the Account Aggregator (AA) ecosystem. Over the last eighteen months, the firm has layered a collections suite onto its existing AA platform, reusing the same multi-tenant infrastructure and integrating AA-pulled bank-statement data into collection prioritisation. I joined as a comprehensive-project intern in December 2025 and worked full-time through May 2026, contributing across two GitLab repositories: \texttt{collection-orchestrator}, the Spring Boot backend plus React dashboards that powers the product, and \texttt{collection-scripts}, the TypeScript / Node.js monorepo that contains the WhatsApp automation library, the Electron desktop client and the Android SMS sender. The title of this comprehensive project is \textbf{``AI-Based Collections Platform''}; the platform is a multi-tenant web application that provides a case management dashboard, a bulk campaign module, an autonomous AI voice calling engine, multi-channel outreach automation across WhatsApp and SMS, and analytics on contact rates, agent productivity, call dispositions and recovery percentages.
 
 \section{Motivation}
 The motivation for this project sits at the intersection of an industry pain point and a technology opening. On the industry side, every percentage point of recovery in Bucket 0 directly improves the lender's Gross Non-Performing Asset (GNPA) metric, reduces provisioning and saves real money. A platform that lifts the early-bucket collection rate from a typical 60--70 percent to the mid-80s -- the target that the Ignosis customer base has set for itself -- is materially valuable to the lender. On the technology side, three developments have made an AI-driven collections platform far more practical than it would have been even three years ago:
@@ -80,7 +49,26 @@ The concrete objectives of the project, all of which were either fully or partia
 \item To follow the production engineering practices of the host company throughout: code review, unit and integration testing, conventional commits, ticketed work items and zero-downtime deployments.
 \end{itemize}
 
-\section{Scope}
+\section{Problem Statement}
+The collections function for a typical Indian retail lender, in the absence of a centralised software platform, suffers from a small number of structural problems that compound on each other:
+
+\begin{enumerate}
+\item \textbf{Manual case allocation.} The lender hands a CSV or Excel file of delinquent accounts to the agency at the start of every monthly cycle. The agency manager then distributes those cases by hand across the agents on the floor. The mapping is opaque to the lender, hard to audit and hard to reproduce.
+\item \textbf{Single-channel outreach.} Agents reach for the desk phone first; if the customer does not pick up the phone they may or may not also send a SMS. There is no orchestrated follow-up across phone, WhatsApp and SMS, which means many customers are never reached on the channel they are likely to respond on.
+\item \textbf{Agent idle time.} Agents spend a significant fraction of their working day searching for the next case in a spreadsheet, dialling a number manually and reading the customer's history before each call. The actual conversation is only a fraction of the working minute.
+\item \textbf{No after-hours coverage.} A human agent's working day ends at 6 PM or 7 PM. After that the lender effectively has no contact channel even though many salaried customers are most reachable in the late evening.
+\item \textbf{No structured measurement.} Recovery rates are reported as a single number at month-end. Lenders cannot inspect bucket-level conversion, channel-level effectiveness or agent-level productivity in any meaningful way.
+\item \textbf{Single-attempt deliverability.} WhatsApp and SMS gateways available through business APIs throttle aggressively, charge per message and are subject to template-approval delays. SIM-based outreach from real consumer-grade numbers has materially higher deliverability but no off-the-shelf platform exposes that capability to the collections team.
+\end{enumerate}
+
+The problem statement of this project, in compact form, can therefore be stated as:
+
+\textit{``Design and contribute to a centralised, multi-tenant collections platform that improves contact rate, agent throughput and after-hours coverage by integrating AI voice calling and multi-channel outreach across WhatsApp and SMS into a single case management workflow, while preserving end-to-end auditability and supporting bulk campaign execution at the scale of a typical monthly allocation.''}
+
+\section{Approach}
+The approach taken on this project was iterative and code-first. Rather than write a long design document up-front and then implement it, the engineering team at Ignosis follows a plan-first-but-small workflow: each piece of work begins as a short Markdown plan attached to a Jira ticket, which is reviewed by the lead engineer (Mr.~Rahi Shah in my case), is then translated into a branch with conventional commits, and is shipped to a development environment within a few days. Production deployment happens after code review, integration testing in a staging tenant and verification by the QA team. Every artefact -- the plan, the branch, the merge request, the QA notes -- is preserved in the repository so that the entire decision trail is auditable months later. This approach is the dominant cultural fact about how the work was done, and it explains why the contributions described in this report are spread across several Git branches that build on one another rather than concentrated in a single feature branch.
+
+\section{Scope of the Project}
 The scope of the work undertaken during the internship covers the following:
 \begin{itemize}
 \item Backend contributions to the multi-tenant Spring Boot 3.2 monolith \texttt{collection-orchestrator}, including JPA entities, REST controllers, services, scheduled jobs and Liquibase migrations.
@@ -91,19 +79,18 @@ The scope of the work undertaken during the internship covers the following:
 
 The scope explicitly excludes the AI voice agent itself (this is the Bolna service that the team purchased on a vendor basis), the telephony gateway (Exotel), the cloud infrastructure provisioning (AWS), the lender's internal LMS and the regulatory compliance review.
 
-\section{Approach}
-The approach taken on this project was iterative and code-first. Rather than write a long design document up-front and then implement it, the engineering team at Ignosis follows a plan-first-but-small workflow: each piece of work begins as a short Markdown plan attached to a Jira ticket, which is reviewed by the lead engineer (Mr.~Rahi Shah in my case), is then translated into a branch with conventional commits, and is shipped to a development environment within a few days. Production deployment happens after code review, integration testing in a staging tenant and verification by the QA team. Every artefact -- the plan, the branch, the merge request, the QA notes -- is preserved in the repository so that the entire decision trail is auditable months later. This approach is the dominant cultural fact about how the work was done, and it explains why the contributions described in this report are spread across several Git branches that build on one another rather than concentrated in a single feature branch.
-
-\section{Organisation of the Rest of the Report}
+\section{Organization of the Rest of the Report}
 
 The remainder of this report is organised as follows.
 
-\textbf{Chapter 2 -- Literature Review and Problem Identification.} A review of the relevant prior art: collection-management products in the Indian and global market, AI voice calling and conversational agent research, the WhatsApp multi-device protocol and the academic literature on anti-spam and rate-limiting strategies for messaging platforms. The chapter ends by sharpening the problem statement of Chapter 1 into a set of concrete engineering requirements.
+\textbf{Chapter 2 -- Literature Review.} A review of the relevant prior art: collection-management products in the Indian and global market, AI voice calling and conversational agent research, the WhatsApp multi-device protocol and the academic literature on anti-spam and rate-limiting strategies for messaging platforms. The chapter ends by sharpening the problem statement of Chapter~1 into a set of concrete engineering requirements.
 
-\textbf{Chapter 3 -- Proposed Methodology and Implementation.} A detailed description of the architecture of the platform, of the development methodology used at Ignosis, and of the specific modules contributed during the internship. The chapter walks through the backend monolith, the dashboard, the campaign engine, the AI voice calling integration, the WhatsApp automation library, the Electron desktop application and the Android SMS sender app. Selected source-code excerpts and pseudocode are included where they illuminate non-obvious engineering decisions.
+\textbf{Chapter 3 -- Proposed Methodology and Implementation.} A detailed description of the development methodology used at Ignosis and of the specific modules contributed during the internship. The chapter walks through the case management subsystem, the workflow engine, the campaign module, the AI voice calling integration, the WhatsApp automation library, the Electron desktop application and the Android SMS sender app.
 
-\textbf{Chapter 4 -- Result Analysis.} Quantitative and qualitative results from the deployment. The chapter reports the early-bucket collection rate, the percentage of cases recovered within the first five days, the contact rate uplift from multi-channel outreach, the throughput of the AI voice agent, and the WhatsApp block rate observed in production.
+\textbf{Chapter 4 -- Software Design.} A design-level view of the platform: design goals, component decomposition, the data model, the API surface, sequence flows for the principal use cases, the deployment view and the security design.
 
-\textbf{Chapter 5 -- Conclusion and Future Work.} A summary of what was achieved during the internship, a candid discussion of what could have been done better, and a roadmap for the features that the engineering team intends to build on top of the platform over the next two quarters.
+\textbf{Chapter 5 -- Results and Discussion.} Quantitative and qualitative results from the deployment. The chapter reports the early-bucket collection rate, the percentage of cases recovered within the first five days, the contact rate uplift from multi-channel outreach, the throughput of the AI voice agent, and the WhatsApp block rate observed in production.
 
-The Bibliography and an Appendix containing selected source-code listings round out the document.
+\textbf{Chapter 6 -- Conclusions and Future Scope.} A summary of what was achieved during the internship, a candid discussion of what could have been done better, and a roadmap for the features that the engineering team intends to build on top of the platform over the next two quarters.
+
+The References and an Appendix containing platform reference material round out the document.

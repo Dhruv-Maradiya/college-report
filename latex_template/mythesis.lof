@@ -2,7 +2,8 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces High-level architecture of the AI-Based Collections Platform. Solid arrows show forward dispatch; the dashed arrow shows the return path used by Bolna webhooks and Android SMS-reply ingestion.}}{16}{figure.caption.6}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces High-level architecture. Solid arrows show forward dispatch; the dashed arrow shows the return path used by Bolna webhooks and Android SMS-reply ingestion.}}{11}{figure.caption.6}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Per-agent calls-per-shift distribution before (blue) and after (red) the speed-dialer rollout. The mean shifts from about 46 to about 87 calls per shift; the variance also collapses, which removes much of the agent-to-agent productivity spread.}}{32}{figure.caption.9}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Cumulative recovery curve over a thirty-day cycle for an equivalent cohort of Bucket~0 cases, under the agency-only baseline (blue) and the platform (red). The platform recovers 70~percent of allocations within the first five days and reaches an 85~percent cycle-end rate against the baseline's 38~percent and 64~percent respectively; the gap is largest in the first five days, which is where the multi-channel orchestration and after-hours AI calling contribute most.}}{23}{figure.caption.11}%
 \addvspace {10\p@ }

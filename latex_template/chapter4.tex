@@ -1,163 +1,61 @@
-\chapter{Result Analysis}
+\chapter{Software Design}
 \label{Chapter 4}
 
-This chapter reports the quantitative and qualitative results obtained from the deployment of the AI-Based Collections Platform across the four lender tenants that were active in production during the latter half of the internship. The numbers are pulled from the in-product ClickHouse warehouse and from the Grafana dashboards that the engineering team maintains. Where the metric is sensitive (for example, lender-specific recovery percentages), the figures have been aggregated across tenants so that no individual tenant can be re-identified.
+The previous chapter described the platform from the perspective of the features that were built. This chapter steps back and describes the same platform at the design level: the goals the design was tested against, the components into which the system decomposes, the data model that ties those components together, the principal sequence flow and the security model.
 
-\section{Outcomes of the Proposed Platform}
-The headline outcomes that the platform demonstrated in production over the three months that ran in parallel with the internship are summarised in Table~\ref{tab:headline}. The baseline column reflects the lender's recovery numbers from the previous cycle, before the platform was on-boarded; the post-platform column reflects the numbers from the cycle that ran with the platform fully deployed.
+\section{Design Goals}
+
+The platform was designed against a small, prioritised set of goals. Tenant isolation is at the top of the list because a leak across tenants is unrecoverable in a regulated environment. Configurable collection policy sits above cost-aware channels because a tenant whose policy is hard-coded into the orchestrator will eventually require a code change just to be onboarded. The remaining goals are operational: auditability, observability and graceful degradation. The full list is summarised in Table~\ref{tab:design-goals}.
 
 \begin{table}[H]
 \centering
-\caption{Headline outcomes from the production deployment.}
-\label{tab:headline}
-\begin{tabularx}{\textwidth}{l c c c}
+\caption{Prioritised design goals.}
+\label{tab:design-goals}
+\begin{tabularx}{\textwidth}{l X}
 \toprule
-\textbf{Metric} & \textbf{Baseline} & \textbf{Post-platform} & \textbf{Delta} \\
+\textbf{Goal} & \textbf{Design implication} \\
 \midrule
-Bucket 0 collection rate & 64\% & 85\% & +21 \\
-Cases recovered within 5 days & 38\% & 70\% & +32 \\
-Promise-to-pay conversion (agents) & 42\% & 65\% & +23 \\
-First-call contact rate & 51\% & 78\% & +27 \\
-Average agent handle time (min) & 8.3 & 4.6 & $-$3.7 \\
-WhatsApp deliverability & 71\% & 92\% & +21 \\
+Tenant isolation by default & Per-tenant Keycloak realm, per-tenant Solr core, tenant-scoped JPA queries, thread-local tenant context propagated across asynchronous boundaries. \\
+Configurable collection policy & Workflow stored as data (nodes plus MVEL transitions), not code. Tenant edits do not require a deployment. \\
+Multi-channel orchestration & Channels are workflow action types. Adding a new channel reduces to adding a new node type, not rewriting the orchestrator. \\
+Auditability & Every state transition writes a row to the case timeline; every outbound action carries an idempotency key. \\
+Graceful degradation & Database-backed job queue, per-job retry policy with exponential backoff, dead-letter handling for permanent failures. \\
+Cost-aware channels & SIM-based WhatsApp and SMS rather than vendor-priced APIs; AI calls only when the workflow asks for them. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The Bucket~0 collection rate -- the percentage of cases newly entering Bucket~0 that are recovered within the same monthly cycle -- is the metric the platform is judged on. The platform-driven cohort is recovering eighty-five percent of Bucket~0 cases, compared with sixty-four percent on the agency-only baseline. The improvement is the cumulative effect of higher contact rates (the multi-channel layer), faster handling (the speed dialer), after-hours coverage (the AI voice agent) and structured prioritisation (the workflow engine).
+\section{Component Decomposition}
 
-\section{Channel-Level Contact Rates}
-A second view of the results breaks the contact rate by channel and by attempt number. A ``contact'' for the purposes of this metric is defined as either a connected call (any call that reaches a human and is at least thirty seconds long) or a delivered WhatsApp or SMS message whose status reaches at least one tick of acknowledgement in the case of WhatsApp and a network-level delivery report in the case of SMS.
+The platform decomposes into seven major components, each owning a well-defined slice of the system surface. Inter-component communication is exclusively over HTTP with API-key or JWT authentication; within a component, the layering is conventional (controller, service, repository on the Spring Boot side; page, hook, service on the React side) and is enforced by review rather than by package boundaries. Table~\ref{tab:components} lists the components.
 
 \begin{table}[H]
 \centering
-\caption{Contact rate by channel and attempt.}
-\label{tab:channel-contact}
-\begin{tabularx}{\textwidth}{l c c c c}
+\caption{Major components of the platform.}
+\label{tab:components}
+\begin{tabularx}{\textwidth}{l l X}
 \toprule
-\textbf{Channel} & \textbf{Attempt 1} & \textbf{Attempt 2} & \textbf{Attempt 3} & \textbf{Cumulative} \\
+\textbf{Component} & \textbf{Stack} & \textbf{Responsibility} \\
 \midrule
-Human agent call & 48\% & 22\% & 11\% & 67\% \\
-AI voice agent   & 41\% & 19\% & 10\% & 60\% \\
-WhatsApp (SIM)   & 88\% & 65\% & 41\% & 94\% \\
-SMS (Android)    & 79\% & 56\% & 32\% & 86\% \\
-Any channel      & 92\% & 81\% & 64\% & 96\% \\
+Orchestrator API & Java 17, Spring Boot 3.2 & Case management, workflow engine, campaign module, scheduled jobs, webhook handlers. \\
+Agent Dashboard & React, UmiJS, Ant Design Pro & Browser-facing UI for human agents and campaign managers. \\
+Automation API & Hono, Node.js & Driver for the WhatsApp sender pool; bridges the orchestrator to Baileys. \\
+Electron Client & Electron, embedded Hono & Operator-side desktop application; locally-paired WhatsApp workers; daily scraping. \\
+Android Sender App & React Native, Expo & SMS dispatch from a real consumer SIM; nightly SMS ingestion. \\
+Identity Layer & Keycloak & SSO; per-tenant realm; federation to lender IdPs. \\
+Search and Analytics & Apache Solr, ClickHouse & Per-tenant case search; event store for the dashboard and the data team. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-A few observations follow from Table~\ref{tab:channel-contact}. First, the AI voice agent's first-attempt contact rate of 41~percent is close to the human agent's 48~percent -- the gap exists, but it is smaller than the engineering team initially expected and reflects the maturity of the Bolna voice stack. Second, WhatsApp is by far the highest-deliverability channel; even a cold first message via a SIM-based WhatsApp number reaches the customer in 88~percent of cases. Third, the combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92~percent of customers on the first attempt and 96~percent cumulatively, which is well above what any single-channel strategy can achieve.
+\section{Data Model}
 
-\section{Speed Dialer Throughput}
-Before the speed dialer was introduced, a typical agent on the platform handled between forty and fifty calls in an eight-hour shift. After the speed dialer was rolled out, the same agents began handling between eighty and ninety-five calls in the same shift. Figure~\ref{fig:throughput} shows the per-agent calls-per-shift distribution before and after the rollout, drawn directly from agent-level logs.
+The data model is a normalised relational schema in PostgreSQL, with denormalised projections cached in Solr for search and in ClickHouse for analytics. The most important relationship in this model is the one between \texttt{Case} and \texttt{UserAllocation}: the case is a stable handle on the customer's relationship with the lender, while the allocation is the cycle-specific projection that the workflow engine drives. Splitting the two keeps the case timeline append-only across cycles and lets a case carry its history forward even when its workflow position is reset at the start of a new cycle. The append-only \texttt{CaseEvent} table is the second important design choice: every action the platform takes against a case appends a row, so queries that show the timeline read from this table directly while queries that need the current state read materialised columns on \texttt{Case} and \texttt{UserAllocation}. This separation keeps the live tables small and the timeline easy to audit.
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[font=\footnotesize]
-  \def\barwidth{0.55}
-  \def\spacing{0.0}
-  % Data: bin centers, before counts, after counts
-  % bins: 25,35,45,55,65,75,85,95
-  \def\yscale{0.22}
-  % axes
-  \draw[->] (0,0) -- (10.5,0) node[right] {calls/shift};
-  \draw[->] (0,0) -- (0,5) node[above] {agents};
-  \foreach \x/\lbl in {1.2/25,2.4/35,3.6/45,4.8/55,6.0/65,7.2/75,8.4/85,9.6/95} {
-    \draw (\x,0.05) -- (\x,-0.05) node[below] {\lbl};
-  }
-  \foreach \y in {5,10,15,20} {
-    \draw (-0.05,\y*\yscale) -- (0.05,\y*\yscale) node[left, xshift=-0.3cm] {\y};
-  }
-  % Before bars (blue)
-  \foreach \x/\c in {1.2/4,2.4/9,3.6/15,4.8/12,6.0/7,7.2/3,8.4/0,9.6/0} {
-    \draw[fill=blue!30, draw=blue!60!black] (\x-\barwidth/2-0.12,0) rectangle (\x-0.12,\c*\yscale);
-  }
-  % After bars (red)
-  \foreach \x/\c in {1.2/0,2.4/0,3.6/2,4.8/6,6.0/11,7.2/18,8.4/14,9.6/6} {
-    \draw[fill=red!30, draw=red!60!black] (\x+0.12,0) rectangle (\x+\barwidth/2+0.12,\c*\yscale);
-  }
-  % Legend
-  \draw[fill=blue!30, draw=blue!60!black] (6.5,4.4) rectangle (6.8,4.65);
-  \node[right] at (6.8,4.525) {before speed dialer};
-  \draw[fill=red!30, draw=red!60!black] (6.5,4.0) rectangle (6.8,4.25);
-  \node[right] at (6.8,4.125) {after speed dialer};
-\end{tikzpicture}
-\caption{Per-agent calls-per-shift distribution before (blue) and after (red) the speed-dialer rollout. The mean shifts from about 46 to about 87 calls per shift; the variance also collapses, which removes much of the agent-to-agent productivity spread.}
-\label{fig:throughput}
-\end{figure}
+\section{Principal Flow: AI Voice Call}
 
-The handle time per call also fell substantially. Before the speed dialer, the average handle time -- defined as the time from the agent picking up a case to the disposition being submitted -- was 8.3 minutes. After the rollout it fell to 4.6 minutes. The decomposition of that 3.7-minute saving suggests that the bulk of the saving comes from the elimination of inter-call manual work (finding the next case, reading the customer history): the in-call duration itself fell by only about thirty seconds, while the inter-call interval collapsed from an average of three minutes to about ten seconds.
+The AI voice call is the most architecturally instructive flow because it crosses every major component and exercises the workflow engine on both the outbound and the inbound side. The orchestrator's scheduler reaches an AI-call node for a case, schedules a call-initiate job, and a defensive status-poll job five minutes later. The job executor pulls the next from-number, builds the Bolna payload and POSTs it; Bolna conducts the call through Exotel and POSTs a terminal webhook at completion. The webhook processor persists the disposition, cancels the poll job, emits Prometheus metrics, and the engine evaluates the outgoing transitions of the current node so the workflow advances on the same request. Two non-obvious points: the defensive poll job exists because the Bolna webhook is best-effort and a polling fallback ensures the case is never indefinitely parked, and the cancellation is implemented as a soft cancel (the poll job runs, observes the case already terminated and exits) which is more robust against database eventual consistency than a hard cancel would be.
 
-\section{WhatsApp Sender Pool Behaviour}
-The WhatsApp sender pool is the most operationally sensitive sub-system of the platform. Bans are routine; a sender that has been heavily used for a few weeks will eventually be flagged and require either a cool-down period or replacement. Table~\ref{tab:wa-bans} reports the empirical ban distribution observed across the five-month period in which the SIM-based WhatsApp workers were running.
+\section{Security Design}
 
-\begin{table}[H]
-\centering
-\caption{WhatsApp sender ban distribution.}
-\label{tab:wa-bans}
-\begin{tabularx}{\textwidth}{l c c}
-\toprule
-\textbf{Sender age (days)} & \textbf{Ban probability per day} & \textbf{Median messages before ban} \\
-\midrule
-0--7      & 8\%   & 230 \\
-8--30     & 3\%   & 870 \\
-31--90    & 1.5\% & 1{,}640 \\
-91--180   & 0.9\% & 2{,}340 \\
-180+      & 0.4\% & 3{,}900 \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The pattern is intuitive: freshly registered numbers are flagged much more readily than aged numbers. Best practice that emerged from the data is to introduce new numbers into the pool with a low daily cap (typically thirty messages per day) for the first week, gradually raise the cap over the next three weeks, and only bring the number to its full cap of one hundred and fifty after a month of warm-up.
-
-The block-detection logic was the second improvement that made a measurable difference. Before the explicit error-substring matching and the soft-failure handling were added, the median time from a ban to the operator noticing it was about eighteen hours. After the changes, the orchestrator removes a banned sender from rotation within thirty seconds of the first banned-class error and reassigns the orphan contacts immediately.
-
-\section{AI Voice Agent Performance}
-The AI voice agent's performance is measured along three dimensions: latency, contact rate and disposition accuracy. The latency budget that Bolna advertises was largely upheld in production: the median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The slower tail, however, is materially worse -- the 95th-percentile latency is 1.4~seconds and the 99th-percentile crosses 2.2~seconds. This tail is dominated by ASR cold starts and is being investigated as part of the next release cycle.
-
-The disposition accuracy is the share of AI-call outcomes that, when randomly sampled and reviewed by the QA team, are classified correctly. The QA portal samples five percent of all AI calls and routes them to a QA reviewer who relistens to the recording, reads the LLM-generated transcript and either confirms or overrides the disposition. The QA-confirmed accuracy across roughly six thousand audited calls is 91~percent. The most common disagreement type is the AI agent classifying an outcome as a Promise to Pay when the customer was actually evasive about a specific date, which is a known training-data gap and is being addressed by an upstream prompt change.
-
-\section{System-Level Metrics}
-A handful of system-level metrics summarise the operational health of the deployment.
-
-\begin{table}[H]
-\centering
-\caption{System-level metrics across the production deployment.}
-\label{tab:sysmetrics}
-\begin{tabularx}{\textwidth}{X r}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-Average API p50 latency & 95~ms \\
-Average API p95 latency & 410~ms \\
-Average API p99 latency & 980~ms \\
-Job queue depth at peak & 1{,}840 jobs \\
-Average campaign size & 4{,}300 cases \\
-Largest campaign processed & 41{,}200 cases \\
-Concurrent AI calls (peak) & 220 \\
-Active tenants & 4 \\
-Daily messages dispatched (WhatsApp) & 42{,}000 \\
-Daily messages dispatched (SMS) & 18{,}500 \\
-Daily AI calls placed & 9{,}600 \\
-ClickHouse events / day & 2.1~million \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-A few observations on these numbers are worth recording. First, the API p99 latency of 980 milliseconds is dominated by a small number of campaign-creation requests where a large CSV is being parsed synchronously; the platform team is in the process of moving the parsing into an asynchronous job. Second, the job-queue depth at peak (around 1{,}840 pending jobs) is well within the queue's capacity and the database has not become a bottleneck. Third, the daily volume of WhatsApp messages dispatched (42{,}000) is several times higher than what a comparable WhatsApp Cloud API deployment would be able to send for a typical lender's budget, which is consistent with the original rationale for the SIM-based approach.
-
-\section{Failure Modes Observed in Production}
-A complete result analysis is incomplete without a candid record of the failure modes that the team encountered in production. The three most consequential were:
-
-\begin{enumerate}
-\item \textbf{Solr connection leak on ECS.} An early version of the Apache Solr client pool did not configure an idle-connection eviction policy. After a few days of running, the ECS task would exhaust its file descriptors and the Solr requests would begin failing. The fix was a pooled connection manager with a maximum of ten thousand connections, a thirty-second idle timeout and a five-minute eviction interval, and a \texttt{@PreDestroy} hook to close the pool cleanly.
-\item \textbf{Webhook race with the status-poll job.} Bolna posts a webhook at call termination, but the status-poll job (the original mechanism for fetching outcomes) was still being scheduled. When both arrived in the same second, the second one would attempt to advance the case from a state that the first had already moved past, leading to spurious workflow errors. The fix was to cancel the in-flight poll job as part of the webhook handling and to set the \texttt{callOutcome} field before any downstream node executes, so that the existing \texttt{ALREADY\_PROCESSED} guard fires for the laggard.
-\item \textbf{Bolna log timestamp parse failure.} For a brief window, Bolna changed the format of its execution-log timestamp from ISO-8601 with a \texttt{T} separator to space-separated with microseconds. The orchestrator's \texttt{LocalDateTime} parser threw, every voice metric on the workflow-poll path went dark, and we did not notice for a few hours because the webhook path was unaffected. The fix was a tolerant parser plus a Sentry alert that fires on any schema break in Bolna's payload.
-\end{enumerate}
-
-Each of these incidents resulted in a runbook entry, a test case and a Liquibase or configuration change that prevents recurrence.
-
-\section{Qualitative Feedback from Stakeholders}
-Beyond the numbers, the qualitative feedback from the stakeholders involved in the deployment was uniformly positive. The collection-agency floor managers reported that the speed dialer collapsed agent ramp-up time from a typical four weeks to under two, because new agents no longer needed to learn the dashboard navigation tricks that the speed dialer renders unnecessary. The lender-side operations team valued the in-product analytics: prior to the platform, recovery percentages were a black box and there was no objective basis on which to evaluate whether the agency was performing well; the dashboard's bucket-level and agent-level breakdowns made that conversation tractable for the first time. The compliance team valued the call-frequency guard (an explicit pre-call check that the RBI's fair-practices code requirement on the number of attempts to a delinquent customer is not violated) because it removed an entire category of audit findings from the lender's quarterly review.
-
-In short, while there are clearly more wins to be had -- the AI voice agent's tail latency, the WhatsApp ban probability for new numbers, and the still-manual nature of the lender-side allocation upload all warrant further engineering -- the platform in its current state has been a material step forward against every metric that the project set out to improve.
+The security design rests on independent layers so that a breach of one does not compromise the layers below. Users authenticate against Keycloak with short-lived per-realm-signed JWTs. Every API call resolves the tenant identifier from the URL prefix and rejects any JWT whose realm does not match, and a thread-local tenant context propagates the tenant identity through every downstream call including across asynchronous boundaries. Role-based access control is enforced both at the controller layer (Spring Security) and at the dashboard layer; every JPA query is scoped to the tenant, every Solr query is routed to the tenant's core, every ClickHouse query carries the tenant tag in its filter, with cross-tenant queries forbidden at the repository layer. Inbound webhooks are authenticated with an HMAC over the body or with a monthly-rotated API key, with the secret in AWS Secrets Manager. A separate set of compliance controls -- call-frequency guards, do-not-call honour periods, PII access logging, recording retention -- is enforced uniformly across all tenants regardless of individual configuration.

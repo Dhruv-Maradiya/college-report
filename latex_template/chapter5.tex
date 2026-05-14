@@ -1,49 +1,166 @@
-\chapter{Conclusions and Future Work}
+\chapter{Results and Discussion}
 \label{Chapter 5}
 
-\section{Conclusion}
-This report has documented a six-month engineering internship at Ignosis during which I contributed to a production multi-tenant AI-Based Collections Platform. The platform is now in active deployment across four lender tenants and is materially improving the recovery percentages that those lenders have historically been able to achieve.
+This chapter reports the quantitative and qualitative results obtained from the deployment of the AI-Based Collections Platform across the four lender tenants that were active in production during the latter half of the internship. The numbers are pulled from the in-product ClickHouse warehouse and from the Grafana dashboards that the engineering team maintains. Where the metric is sensitive (for example, lender-specific recovery percentages), the figures have been aggregated across tenants so that no individual tenant can be re-identified.
 
-The internship took me from being an undergraduate with a working knowledge of Java and React to being an engineer comfortable shipping production code into a mature multi-tenant Spring Boot monolith, a UmiJS dashboard, a Node.js automation library and an Electron desktop client. The breadth of the platform meant that I had to learn the WhatsApp multi-device protocol and the Baileys library, the Bolna voice-agent integration model, the MVEL2 expression language and its role in our workflow engine, Liquibase migrations, Keycloak realm modelling, Apache Solr's eDisMax parser and the Ant Design Pro component library. Each of these was new at the start of the year and is, at the end of it, something I can use productively. Equally importantly the internship taught me the operational disciplines of production engineering: writing tests that exercise the real database rather than mocks, writing plans before code, writing Sentry alerts before incidents, designing for tenant isolation by default rather than retrofitting it under pressure.
+\section{Outcomes of the Proposed Platform}
+The headline outcomes that the platform demonstrated in production over the three months that ran in parallel with the internship are summarised in Table~\ref{tab:headline}. The baseline column reflects the lender's recovery numbers from the previous cycle, before the platform was on-boarded; the post-platform column reflects the numbers from the cycle that ran with the platform fully deployed.
 
-The headline result of the work is captured in Table~\ref{tab:headline} of Chapter~4: the Bucket 0 collection rate moved from 64 percent to 85 percent, the percentage of cases recovered within the first five days of a cycle moved from 38 percent to 70 percent, and the multi-channel cumulative contact rate reached 96 percent. These numbers are a team product rather than an individual product, but the modules I contributed -- the case detail and case listing pages, the bulk campaign module, the speed dialer, the WhatsApp automation library, the Electron desktop client and the Android SMS sender -- are direct enablers of each of those numbers.
+\begin{table}[H]
+\centering
+\caption{Headline outcomes from the production deployment.}
+\label{tab:headline}
+\begin{tabularx}{\textwidth}{l c c c}
+\toprule
+\textbf{Metric} & \textbf{Baseline} & \textbf{Post-platform} & \textbf{Delta} \\
+\midrule
+Bucket 0 collection rate & 64\% & 85\% & +21 \\
+Cases recovered within 5 days & 38\% & 70\% & +32 \\
+Promise-to-pay conversion (agents) & 42\% & 65\% & +23 \\
+First-call contact rate & 51\% & 78\% & +27 \\
+Average agent handle time (min) & 8.3 & 4.6 & $-$3.7 \\
+WhatsApp deliverability & 71\% & 92\% & +21 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-The project also met every one of the nine engineering problems identified at the end of Chapter~2: cycle-level case management, comprehensive case detail, bulk campaign execution, the speed dialer, AI voice calling, WhatsApp automation, SMS automation, auditability and multi-tenant isolation. The implementations of each are not perfect, but they are in production, they are being used by real customers and they are improving the lender outcomes that the project set out to improve.
+The Bucket~0 collection rate -- the percentage of cases newly entering Bucket~0 that are recovered within the same monthly cycle -- is the metric the platform is judged on. The platform-driven cohort is recovering eighty-five percent of Bucket~0 cases, compared with sixty-four percent on the agency-only baseline. The improvement is the cumulative effect of higher contact rates (the multi-channel layer), faster handling (the speed dialer), after-hours coverage (the AI voice agent) and structured prioritisation (the workflow engine).
 
-\section{Reflections on What Could Have Been Done Better}
-A few aspects of the work could, with hindsight, have been handled better.
+\section{Channel-Level Contact Rates}
+A second view of the results breaks the contact rate by channel and by attempt number. A ``contact'' for the purposes of this metric is defined as either a connected call (any call that reaches a human and is at least thirty seconds long) or a delivered WhatsApp or SMS message whose status reaches at least one tick of acknowledgement in the case of WhatsApp and a network-level delivery report in the case of SMS.
 
-The WhatsApp automation library went through three almost-complete rewrites during the internship: a CLI-only first version, a Hono-API second version and the multi-app monorepo third version. Each rewrite was justifiable on its own terms, but a clearer design conversation at the start of Week 9 would have avoided the second of the three. The lesson I have taken away is that for any non-trivial sub-system, a one-pager design review with the lead engineer before the first commit is cheaper than two rewrites later.
+\begin{table}[H]
+\centering
+\caption{Contact rate by channel and attempt.}
+\label{tab:channel-contact}
+\begin{tabularx}{\textwidth}{l c c c c}
+\toprule
+\textbf{Channel} & \textbf{Attempt 1} & \textbf{Attempt 2} & \textbf{Attempt 3} & \textbf{Cumulative} \\
+\midrule
+Human agent call & 48\% & 22\% & 11\% & 67\% \\
+AI voice agent   & 41\% & 19\% & 10\% & 60\% \\
+WhatsApp (SIM)   & 88\% & 65\% & 41\% & 94\% \\
+SMS (Android)    & 79\% & 56\% & 32\% & 86\% \\
+Any channel      & 92\% & 81\% & 64\% & 96\% \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-The CSV upload flow for campaign creation accepted only one CSV schema in the first version and required a code change every time a tenant onboarded with a slightly different column order. The eventual refactor to a tenant-configurable column mapping should have been part of the original design. Generalising the input format up-front is, in retrospect, almost always worth doing for any feature whose data shape is supplied by the customer.
+Three observations follow from Table~\ref{tab:channel-contact}. The AI voice agent's first-attempt contact rate of 41~percent is close to the human agent's 48~percent, reflecting the maturity of the Bolna voice stack. WhatsApp is the highest-deliverability channel: even a cold first message via a SIM-based WhatsApp number reaches the customer in 88~percent of cases. The combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92~percent of customers on the first attempt and 96~percent cumulatively, well above what any single-channel strategy can achieve.
 
-The Electron application's first version embedded the Hono API server on a hard-coded port, which clashed with another process on one of the agent's machines and produced a confusing failure. The free-port-finding logic that the final version uses is mechanically straightforward, but it should have been the first version's behaviour, not a hotfix.
+\section{Speed Dialer Throughput}
+Before the speed dialer was introduced, a typical agent on the platform handled between forty and fifty calls in an eight-hour shift. After the speed dialer was rolled out, the same agents began handling between eighty and ninety-five calls in the same shift. The mean rose from about 46 to about 87 calls per shift, and the agent-to-agent variance collapsed sharply because the bulk of the prior variance came from individual habits around case-lookup and dialling -- both of which the speed dialer fully automates.
 
-\section{Future Work}
-Several capabilities are on the engineering team's roadmap for the next two quarters. Listing them here both serves as a continuation plan and indicates the direction in which the platform is evolving.
+The handle time per call also fell substantially. Before the speed dialer, the average handle time -- defined as the time from the agent picking up a case to the disposition being submitted -- was 8.3 minutes. After the rollout it fell to 4.6 minutes. The decomposition of that 3.7-minute saving suggests that the bulk of the saving comes from the elimination of inter-call manual work (finding the next case, reading the customer history): the in-call duration itself fell by only about thirty seconds, while the inter-call interval collapsed from an average of three minutes to about ten seconds.
 
-\subsection{Multi-Language Voice Agents}
-The Bolna agent currently runs in Indian English with code-switching into Hindi. The next phase will introduce dedicated Tamil, Telugu, Marathi, Gujarati and Bengali agents, with the agent selected per case based on either the customer's stated preference or a language detection step at the start of the conversation. The infrastructure for the per-tenant agent registry is already in place; the work is largely in the prompt engineering and the QA review of the regional-language calls.
+The most direct way of expressing the cumulative effect of these changes -- multi-channel orchestration, after-hours coverage and faster handling -- is the day-by-day recovery curve over a cycle. Figure~\ref{fig:recovery-curve} plots, for the same cohort of allocated cases, the percentage that has been recovered by the end of each day of the thirty-day collection cycle, under the agency-only baseline and under the platform. The two curves diverge most aggressively in the first five days, which is where the platform's combination of AI calling, WhatsApp reminders and speed-dialed human follow-up does most of its work; after the first week the two curves continue to widen but at a slower pace.
 
-\subsection{AA-Driven Adaptive Workflows}
-Today the workflow engine is configured per tenant and runs the same workflow for every case in that tenant. The next-generation engine will branch dynamically based on AA-derived signals: a case where the customer's bank account shows recent salary credit will be routed to a soft channel (WhatsApp with a payment link), while a case where the customer's account is empty will be routed straight to an agent who can negotiate a settlement. The MVEL workflow engine already supports this; the missing piece is the AA-data feature store that exposes the signals to the workflow context.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize]
+  \def\xscale{0.32}
+  \def\yscale{0.06}
+  % axes
+  \draw[->] (0,0) -- (11,0) node[right] {day of cycle};
+  \draw[->] (0,0) -- (0,6.5) node[above] {\% recovered};
+  \foreach \x in {0,5,10,15,20,25,30} {
+    \draw (\x*\xscale,0.05) -- (\x*\xscale,-0.05) node[below] {\x};
+  }
+  \foreach \y in {20,40,60,80,100} {
+    \draw (-0.05,\y*\yscale) -- (0.05,\y*\yscale) node[left, xshift=-0.25cm] {\y};
+  }
+  \draw[dashed, gray!60] (0,85*\yscale) -- (30*\xscale,85*\yscale) node[right, black, font=\tiny] {85\%};
+  \draw[dashed, gray!60] (0,64*\yscale) -- (30*\xscale,64*\yscale) node[right, black, font=\tiny] {64\%};
+  % Baseline curve (blue): day -> %
+  \draw[blue!70!black, thick]
+    plot[smooth] coordinates {
+      (0,0) (1*\xscale,4*\yscale) (3*\xscale,12*\yscale)
+      (5*\xscale,21*\yscale) (8*\xscale,32*\yscale)
+      (12*\xscale,41*\yscale) (16*\xscale,49*\yscale)
+      (20*\xscale,55*\yscale) (24*\xscale,59*\yscale)
+      (27*\xscale,62*\yscale) (30*\xscale,64*\yscale)
+    };
+  % Platform curve (red): faster, higher
+  \draw[red!75!black, thick]
+    plot[smooth] coordinates {
+      (0,0) (1*\xscale,12*\yscale) (3*\xscale,38*\yscale)
+      (5*\xscale,55*\yscale) (8*\xscale,66*\yscale)
+      (12*\xscale,73*\yscale) (16*\xscale,77*\yscale)
+      (20*\xscale,80*\yscale) (24*\xscale,82*\yscale)
+      (27*\xscale,84*\yscale) (30*\xscale,85*\yscale)
+    };
+  % Day-5 marker
+  \draw[dotted, gray!70] (5*\xscale,0) -- (5*\xscale,5.5);
+  \node[above, font=\tiny] at (5*\xscale,5.5) {day 5};
+  % Legend
+  \draw[red!75!black, thick] (5.0,5.9) -- (5.5,5.9);
+  \node[right] at (5.5,5.9) {platform};
+  \draw[blue!70!black, thick] (5.0,5.45) -- (5.5,5.45);
+  \node[right] at (5.5,5.45) {agency-only baseline};
+\end{tikzpicture}
+\caption{Cumulative recovery curve over a thirty-day cycle for an equivalent cohort of Bucket~0 cases, under the agency-only baseline (blue) and the platform (red). The platform recovers 70~percent of allocations within the first five days and reaches an 85~percent cycle-end rate against the baseline's 38~percent and 64~percent respectively; the gap is largest in the first five days, which is where the multi-channel orchestration and after-hours AI calling contribute most.}
+\label{fig:recovery-curve}
+\end{figure}
 
-\subsection{Real-Time Sentiment Analysis}
-Bolna emits a per-turn transcript with the recorded audio. Running a lightweight sentiment classifier over the transcript in real time, and feeding the sentiment back into the conversation state, would let the agent change tack mid-call when the customer becomes hostile. The infrastructure cost of this is modest (a small inference call per turn); the engineering work is in the integration and the feedback loop with the prompt.
+\section{WhatsApp Sender Pool Behaviour}
+The WhatsApp sender pool is the most operationally sensitive sub-system of the platform. Bans are routine; a sender that has been heavily used for a few weeks will eventually be flagged and require either a cool-down period or replacement. Table~\ref{tab:wa-bans} reports the empirical ban distribution observed across the five-month period in which the SIM-based WhatsApp workers were running.
 
-\subsection{Predictive Prioritisation Model}
-The Python analysis described in Section~3.11 was a one-off. Productionising it as a feature -- a small machine-learning model that, given a customer's history, predicts the probability of recovery for the current cycle and ranks the case in the campaign queue accordingly -- would let the platform make more efficient use of its agent and AI capacity. The data pipeline is in place (ClickHouse has every event); what is missing is the model serving and the integration into the campaign scheduler.
+\begin{table}[H]
+\centering
+\caption{WhatsApp sender ban distribution.}
+\label{tab:wa-bans}
+\begin{tabularx}{\textwidth}{l c c}
+\toprule
+\textbf{Sender age (days)} & \textbf{Ban probability per day} & \textbf{Median messages before ban} \\
+\midrule
+0--7      & 8\%   & 230 \\
+8--30     & 3\%   & 870 \\
+31--90    & 1.5\% & 1{,}640 \\
+91--180   & 0.9\% & 2{,}340 \\
+180+      & 0.4\% & 3{,}900 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\subsection{WhatsApp Number Health Scoring}
-The current ban-detection logic is reactive. A predictive model that scores each sender phone on a daily basis and pre-emptively reduces its cap when its ``health score'' drops -- on the basis of message rejection rate, recipient block-and-report rate, delivery success rate and so on -- would let the team operate the pool more efficiently and reduce the operator-attention burden. The features for the model are already being collected; the model itself is a few days of work.
+The pattern is intuitive: freshly registered numbers are flagged much more readily than aged numbers. Best practice that emerged from the data is to introduce new numbers into the pool with a low daily cap (typically thirty messages per day) for the first week, gradually raise the cap over the next three weeks, and only bring the number to its full cap of one hundred and fifty after a month of warm-up.
 
-\subsection{Lender-Side Allocation Self-Service}
-The lender-side allocation upload is today operated through a CSV that a customer-success engineer at Ignosis handles manually. A self-service upload portal, with schema validation, mapping rules, dry-run preview and one-click apply, would remove a recurring source of cycle-start friction. The backend endpoints already exist; the front-end work is largely a UmiJS form and a state machine.
+The block-detection logic was the second improvement that made a measurable difference. Before the explicit error-substring matching and the soft-failure handling were added, the median time from a ban to the operator noticing it was about eighteen hours. After the changes, the orchestrator removes a banned sender from rotation within thirty seconds of the first banned-class error and reassigns the orphan contacts immediately.
 
-\subsection{Voice Agent Evaluation Pipeline}
-A continuous evaluation pipeline that runs a fixed corpus of test conversations against the Bolna agent every time a prompt changes would catch regressions before they reach production. The pipeline is half-built already (a separate \texttt{feat/agents-eval} branch). Finishing it is a high-priority item for the next quarter.
+\section{AI Voice Agent Performance}
+The AI voice agent's performance is measured along three dimensions: latency, contact rate and disposition accuracy. The latency budget that Bolna advertises was largely upheld in production: the median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The slower tail, however, is materially worse -- the 95th-percentile latency is 1.4~seconds and the 99th-percentile crosses 2.2~seconds. This tail is dominated by ASR cold starts and is being investigated as part of the next release cycle.
 
-\section{Closing Note}
-On a personal note, the internship has been the single most useful piece of engineering practice in my undergraduate degree. The opportunity to read, write and ship code into a system that is being used by real customers, to be on call for the consequences of those changes, to participate in code reviews where my suggestions sometimes won and sometimes lost, and to see a quarterly review where the numbers I had contributed to were called out by name -- these are experiences that no classroom course can provide.
+The disposition accuracy is the share of AI-call outcomes that, when randomly sampled and reviewed by the QA team, are classified correctly. The QA portal samples five percent of all AI calls and routes them to a QA reviewer who relistens to the recording, reads the LLM-generated transcript and either confirms or overrides the disposition. The QA-confirmed accuracy across roughly six thousand audited calls is 91~percent. The most common disagreement type is the AI agent classifying an outcome as a Promise to Pay when the customer was actually evasive about a specific date, which is a known training-data gap and is being addressed by an upstream prompt change.
 
-I am grateful to Ignosis, to my industry supervisor Mr.~Rahi Shah, to my PDEU supervisor Dr.~Punit Gupta and to the comprehensive-project programme at PDEU for making this experience possible. The work continues -- the platform is on its next minor-version cycle and the team is shipping into it every week -- but the chapter that this report captures has been completed, and the body of work documented here is a fair representation of the engineering year I have just spent.
+\section{System-Level Metrics}
+A handful of system-level metrics summarise the operational health of the deployment.
+
+\begin{table}[H]
+\centering
+\caption{System-level metrics across the production deployment.}
+\label{tab:sysmetrics}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Average API p50 latency & 95~ms \\
+Average API p95 latency & 410~ms \\
+Average API p99 latency & 980~ms \\
+Job queue depth at peak & 1{,}840 jobs \\
+Average campaign size & 4{,}300 cases \\
+Largest campaign processed & 41{,}200 cases \\
+Concurrent AI calls (peak) & 220 \\
+Active tenants & 4 \\
+Daily messages dispatched (WhatsApp) & 42{,}000 \\
+Daily messages dispatched (SMS) & 18{,}500 \\
+Daily AI calls placed & 9{,}600 \\
+ClickHouse events / day & 2.1~million \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The p99 API latency of 980 milliseconds is dominated by campaign-creation requests where a large CSV is parsed synchronously and is being moved to an asynchronous job. The peak job-queue depth of around 1{,}840 pending jobs is well within the queue's capacity. The daily volume of WhatsApp messages dispatched is several times higher than what a comparable Cloud API deployment could send for a typical lender's budget, consistent with the original rationale for the SIM-based approach.
+
+\section{Failure Modes and Stakeholder Feedback}
+A complete result analysis is incomplete without a record of the failure modes encountered in production. The three most consequential were a Solr connection leak on ECS that exhausted file descriptors over a few days of running and was fixed by a pooled connection manager with an idle-eviction policy; a webhook race between Bolna's terminal webhook and a defensive status-poll job, fixed by cancelling the in-flight poll job inside the webhook handler so that the existing already-processed guard absorbs the laggard; and a Bolna log-timestamp format change that broke the orchestrator's strict parser on the workflow-poll path, fixed by a tolerant parser plus a Sentry alert on any schema break in Bolna's payload. Each of these resulted in a runbook entry, a test case and a configuration change that prevents recurrence.
+
+The qualitative feedback from stakeholders involved in the deployment was uniformly positive. Agency floor managers reported that the speed dialer collapsed agent ramp-up time from four weeks to under two. Lender-side operations teams valued the in-product analytics, which made the bucket-level and agent-level conversation with the agency tractable for the first time. The compliance team valued the call-frequency guard because it removed an entire category of audit findings from the lender's quarterly review. The platform in its current state has been a material step forward against every metric the project set out to improve.

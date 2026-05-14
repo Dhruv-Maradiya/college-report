@@ -1,91 +1,43 @@
-\chapter*{Appendix A: Selected Source-Code Listings}
-\addcontentsline{toc}{chapter}{Appendix A: Selected Source-Code Listings}
+\chapter*{Appendix A: Weekly Progress Log}
+\addcontentsline{toc}{chapter}{Appendix A: Weekly Progress Log}
 \markboth{Appendix A}{Appendix A}
 
-This appendix collects a handful of code excerpts referenced in the main text. They are abridged for readability; the complete files are tracked in the \texttt{collection-orchestrator} and \texttt{collection-scripts} GitLab repositories.
+The internship ran across twenty-six weeks. The week-by-week log below records, for each week, the principal feature or experiment that occupied that week. The log is the source of the contributions list in Section~3.10 and the failure-mode discussion in Chapter~5.
 
-\section*{A.1 Tenant Context Propagation Across Asynchronous Boundaries}
-
-\begin{lstlisting}[caption={Asynchronous template that propagates the tenant ThreadLocal.}]
-public class AsyncTemplate {
-  private final Executor executor;
-
-  public CompletableFuture<Void> runAsync(Runnable work) {
-    final String tenantId = TenantContext.get();
-    return CompletableFuture.runAsync(() -> {
-      try {
-        TenantContext.set(tenantId);
-        work.run();
-      } finally {
-        TenantContext.clear();
-      }
-    }, executor);
-  }
-}
-\end{lstlisting}
-
-\section*{A.2 Worker Loop for a WhatsApp Sender}
-
-\begin{lstlisting}[caption={Per-sender worker loop, abridged from messaging/sender.ts.}]
-while (true) {
-  if (!isWithinActiveHours(config.timing)) {
-    await sleep(msUntilActiveHours(config.timing));
-    continue;
-  }
-  if (tracker.getSenderState(senderPhone).sentToday >= dailyLimit) {
-    return;
-  }
-  const pull = queue.pullFor(senderPhone);
-  if (pull.kind === 'done') break;
-  if (pull.kind === 'wait') { await sleep(30_000); continue; }
-  await sendWithPresenceSimulation(pull.contact, sock, template);
-  if (++sentInBatch >= currentBatchSize) {
-    await sleep(getBreakDuration());
-    sentInBatch = 0;
-    currentBatchSize = getBatchSize();
-  }
-}
-\end{lstlisting}
-
-\section*{A.3 Message Body Micro-Variation}
-
-\begin{lstlisting}[caption={Micro-variation applied to every outbound WhatsApp body.}]
-function applyMicroVariations(text: string): string {
-  if (Math.random() < 0.3) {
-    text = text.endsWith('.') ? text.slice(0, -1) : text + '.';
-  }
-  if (Math.random() < 0.2) {
-    const pos = randomInt(1, text.length - 1);
-    text = text.slice(0, pos) + ZWSP + text.slice(pos); // U+200B
-  }
-  return text;
-}
-\end{lstlisting}
-
-\section*{A.4 Bolna Webhook Handler}
-
-\begin{lstlisting}[caption={Webhook handler for the Bolna call-status callback.}]
-@PostMapping(value = "/bolna-webhook")
-public ResponseEntity<Void> handle(@RequestBody BolnaWebHookRequest payload) {
-  voiceCallWebhookProcessor.applyTerminalStatus(payload);
-  bolnaCallMetricsService.emit(payload);
-  return ResponseEntity.ok().build();
-}
-\end{lstlisting}
-
-\section*{A.5 Liquibase Migration for the QA Issue Table}
-
-\begin{lstlisting}[caption={Liquibase changeset for the qa\_issue table.}]
-<changeSet id="2026-04-22-qa-issue" author="dhruv">
-  <createTable tableName="qa_issue">
-    <column name="id" type="UUID"><constraints primaryKey="true"/></column>
-    <column name="iss_id" type="VARCHAR(20)"><constraints unique="true"/></column>
-    <column name="tenant_id" type="VARCHAR(64)"><constraints nullable="false"/></column>
-    <column name="call_id" type="UUID"><constraints nullable="false"/></column>
-    <column name="category" type="VARCHAR(64)"/>
-    <column name="status" type="VARCHAR(32)"/>
-    <column name="priority" type="VARCHAR(16)"/>
-    <column name="created_at" type="TIMESTAMP"/>
-  </createTable>
-</changeSet>
-\end{lstlisting}
+\begin{table}[H]
+\centering
+\caption{Weekly progress log for the internship.}
+\label{tab:weekly-log}
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Week} & \textbf{Principal work} \\
+\midrule
+1 & Onboarding; environment setup; reading the existing orchestrator codebase and the AA pipeline. \\
+2 & First Jira ticket: a small refactor of the tenant-context propagation across asynchronous boundaries. \\
+3 & Foundations: code review participation; runbook reading; shadowing the on-call rotation. \\
+4 & One-off Python and pandas analysis of forty thousand customer records, leading to the prioritisation findings. \\
+5 & Case listing page on the agent dashboard: paged backend, Solr search wiring, ProTable component. \\
+6 & Case detail page: progressive loading, payment-history strip, AA-signal panel. \\
+7 & Bulk campaign module: creation form, CSV upload, validation preview. \\
+8 & Speed dialer: SSE wiring, disposition form, auto-advance loop; integration of AI calling into the workflow engine. \\
+9 & WhatsApp automation first cut: CLI-based sender, multi-file auth state, anti-ban heuristics. \\
+10 & WhatsApp automation rewrite to a Hono REST API; multi-device rotation; block detection. \\
+11 & Electron desktop application with embedded API server and chat-history scraper; Android SMS sender first cut. \\
+12 & Android SMS sender refinement: native module, background sync task, throttling constants. \\
+13 & Production bug-fix sprint: Solr connection leak, webhook-poll race, Bolna timestamp parse failure. \\
+14 & Voice metrics: standardisation of per-turn latency tags; Prometheus dashboard for cold and warm turns. \\
+15 & QA workflow: QA issue table; reviewer assignment rules; sampling logic for the five-percent audit. \\
+16 & Tenant-configurable column mapping for CSV upload. \\
+17 & WhatsApp number-warm-up scheduling: graduated daily caps for newly added senders. \\
+18 & Speed dialer ergonomics: keyboard-shortcut overlay; disposition pre-fills based on call outcome. \\
+19 & Campaign analytics: live counters; SSE-driven dashboard; per-campaign drill-down. \\
+20 & Workflow migration service: re-mapping in-flight cases when a tenant edits its workflow mid-cycle. \\
+21 & Liquibase migration cleanup; one-time backfill scripts; data-quality checks on the audit log. \\
+22 & WhatsApp message-template editor: tenant-side authoring; preview-with-substitution. \\
+23 & Android SMS reply ingestion: end-to-end test on a real device pool; reliability over flaky network. \\
+24 & Voice agent evaluation: half-built pipeline against a fixed conversation corpus; carried forward as future work. \\
+25 & Documentation and runbook pass; weekly progress consolidation for the report. \\
+26 & Report writing, demo preparation, knowledge-transfer sessions with the team. \\
+\bottomrule
+\end{tabularx}
+\end{table}
