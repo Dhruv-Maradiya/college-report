@@ -1,7 +1,7 @@
 \chapter{Results and Discussion}
 \label{Chapter 5}
 
-This chapter reports the quantitative and qualitative results obtained from the deployment of the AI-Based Collections Platform across the four lender tenants that were active in production during the latter half of the internship. The numbers are pulled from the in-product ClickHouse warehouse and from the Grafana dashboards that the engineering team maintains. Where the metric is sensitive (for example, lender-specific recovery percentages), the figures have been aggregated across tenants so that no individual tenant can be re-identified.
+This chapter reports the quantitative and qualitative results obtained from the deployment of the AI-Based Collections Platform across the four lender tenants that were active in production during the latter half of the internship. The numbers are pulled from the in-product analytics warehouse and from the operational dashboards that the engineering team maintains. Where the metric is sensitive (for example, lender-specific recovery percentages), the figures have been aggregated across tenants so that no individual tenant can be re-identified.
 
 \section{Outcomes of the Proposed Platform}
 The headline outcomes that the platform demonstrated in production over the three months that ran in parallel with the internship are summarised in Table~\ref{tab:headline}. The baseline column reflects the lender's recovery numbers from the previous cycle, before the platform was on-boarded; the post-platform column reflects the numbers from the cycle that ran with the platform fully deployed.
@@ -46,7 +46,52 @@ Any channel      & 92\% & 81\% & 64\% & 96\% \\
 \end{tabularx}
 \end{table}
 
-Three observations follow from Table~\ref{tab:channel-contact}. The AI voice agent's first-attempt contact rate of 41~percent is close to the human agent's 48~percent, reflecting the maturity of the Bolna voice stack. WhatsApp is the highest-deliverability channel: even a cold first message via a SIM-based WhatsApp number reaches the customer in 88~percent of cases. The combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92~percent of customers on the first attempt and 96~percent cumulatively, well above what any single-channel strategy can achieve.
+Figure~\ref{fig:channel-bars} renders the same data as a grouped bar chart, which makes the per-attempt drop-off and the channel ranking easier to read at a glance.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize]
+  \def\bw{0.32}
+  \def\gw{0.10}
+  \def\gap{2.0}
+  \def\ymax{6.0}
+  \def\ys{0.05}
+  \draw[->] (0,0) -- (0,\ymax+0.4) node[above] {contact rate (\%)};
+  \draw[->] (0,0) -- (5*\gap+0.4,0) node[right] {channel};
+  \foreach \y in {20,40,60,80,100} {
+    \draw[gray!30] (0,\y*\ys) -- (5*\gap+0.2,\y*\ys);
+    \draw (-0.05,\y*\ys) -- (0.05,\y*\ys) node[left, xshift=-0.15cm] {\y};
+  }
+  \def\drawgroup#1#2#3#4#5#6{
+    \pgfmathsetmacro\xc{#1*\gap+0.6}
+    \pgfmathsetmacro\xa{\xc-1.5*\bw-\gw}
+    \pgfmathsetmacro\xb{\xc-0.5*\bw}
+    \pgfmathsetmacro\xd{\xc+0.5*\bw+\gw}
+    \pgfmathsetmacro\xe{\xc+1.5*\bw+2*\gw}
+    \fill[blue!55] (\xa,0) rectangle (\xa+\bw,#3*\ys);
+    \fill[blue!35] (\xb,0) rectangle (\xb+\bw,#4*\ys);
+    \fill[blue!20] (\xd,0) rectangle (\xd+\bw,#5*\ys);
+    \fill[red!55]  (\xe,0) rectangle (\xe+\bw,#6*\ys);
+    \node[font=\tiny, align=center, below=2pt] at (\xc,0) {#2};
+  }
+  \drawgroup{1}{Human}{48}{22}{11}{67}
+  \drawgroup{2}{AI voice}{41}{19}{10}{60}
+  \drawgroup{3}{WhatsApp}{88}{65}{41}{94}
+  \drawgroup{4}{SMS}{79}{56}{32}{86}
+  \drawgroup{5}{Any ch.}{92}{81}{64}{96}
+  % legend
+  \begin{scope}[shift={(0.3,\ymax+0.0)}]
+    \fill[blue!55] (0,0) rectangle (0.25,0.25); \node[right, font=\tiny] at (0.3,0.12) {Attempt 1};
+    \fill[blue!35] (1.4,0) rectangle (1.65,0.25); \node[right, font=\tiny] at (1.7,0.12) {Attempt 2};
+    \fill[blue!20] (2.8,0) rectangle (3.05,0.25); \node[right, font=\tiny] at (3.1,0.12) {Attempt 3};
+    \fill[red!55]  (4.2,0) rectangle (4.45,0.25); \node[right, font=\tiny] at (4.5,0.12) {Cumulative};
+  \end{scope}
+\end{tikzpicture}
+\caption{Contact rate by channel and attempt. WhatsApp dominates at every attempt, while the ``any channel'' bars confirm that multi-channel orchestration buys an additional 4--8 percentage points over the best single channel at each attempt.}
+\label{fig:channel-bars}
+\end{figure}
+
+Three observations follow from Table~\ref{tab:channel-contact}. The AI voice agent's first-attempt contact rate of 41~percent is close to the human agent's 48~percent, reflecting the maturity of the internal voice AI platform. WhatsApp is the highest-deliverability channel: even a cold first message via a SIM-based WhatsApp number reaches the customer in 88~percent of cases. The combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92~percent of customers on the first attempt and 96~percent cumulatively, well above what any single-channel strategy can achieve.
 
 \section{Speed Dialer Throughput}
 Before the speed dialer was introduced, a typical agent on the platform handled between forty and fifty calls in an eight-hour shift. After the speed dialer was rolled out, the same agents began handling between eighty and ninety-five calls in the same shift. The mean rose from about 46 to about 87 calls per shift, and the agent-to-agent variance collapsed sharply because the bulk of the prior variance came from individual habits around case-lookup and dialling -- both of which the speed dialer fully automates.
@@ -127,7 +172,40 @@ The pattern is intuitive: freshly registered numbers are flagged much more readi
 The block-detection logic was the second improvement that made a measurable difference. Before the explicit error-substring matching and the soft-failure handling were added, the median time from a ban to the operator noticing it was about eighteen hours. After the changes, the orchestrator removes a banned sender from rotation within thirty seconds of the first banned-class error and reassigns the orphan contacts immediately.
 
 \section{AI Voice Agent Performance}
-The AI voice agent's performance is measured along three dimensions: latency, contact rate and disposition accuracy. The latency budget that Bolna advertises was largely upheld in production: the median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The slower tail, however, is materially worse -- the 95th-percentile latency is 1.4~seconds and the 99th-percentile crosses 2.2~seconds. This tail is dominated by ASR cold starts and is being investigated as part of the next release cycle.
+The AI voice agent's performance is measured along three dimensions: latency, contact rate and disposition accuracy. The latency budget the internal voice AI platform targets was largely upheld in production: the median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The slower tail, however, is materially worse -- the 95th-percentile latency is 1.4~seconds and the 99th-percentile crosses 2.2~seconds. Figure~\ref{fig:voice-latency} renders the three percentile bars against the 800--900~ms band at which human listeners begin to detect awkwardness; the median sits comfortably below the band, the p95 crosses it, and the p99 is roughly three times the perceptual threshold.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize]
+  \def\bw{0.9}
+  \def\xs{2.2}
+  \def\ys{1.6}
+  \draw[->] (0,0) -- (0,4.6) node[above] {turn-end-to-agent-start latency (s)};
+  \draw[->] (0,0) -- (4*\xs+0.4,0);
+  \foreach \y/\lab in {0.5/0.5, 1.0/1.0, 1.5/1.5, 2.0/2.0, 2.5/2.5} {
+    \draw[gray!25] (0,\y*\ys) -- (3*\xs+0.6,\y*\ys);
+    \draw (-0.05,\y*\ys) -- (0.05,\y*\ys) node[left, xshift=-0.15cm] {\lab};
+  }
+  % perceptual band 0.8 - 0.9 s
+  \fill[orange!25, opacity=0.55] (0,0.8*\ys) rectangle (3*\xs+0.6,0.9*\ys);
+  \node[right, font=\tiny, orange!60!black] at (3*\xs+0.65,0.85*\ys) {800--900~ms};
+  \node[right, font=\tiny, orange!60!black] at (3*\xs+0.65,0.85*\ys-0.3) {perceptual threshold};
+  % bars
+  \fill[green!55!black] (1*\xs-\bw/2,0) rectangle (1*\xs+\bw/2,0.69*\ys);
+  \node[above, font=\tiny] at (1*\xs,0.69*\ys) {0.69~s};
+  \node[below, font=\tiny\bfseries] at (1*\xs,0) {p50};
+  \fill[orange!75!black] (2*\xs-\bw/2,0) rectangle (2*\xs+\bw/2,1.4*\ys);
+  \node[above, font=\tiny] at (2*\xs,1.4*\ys) {1.4~s};
+  \node[below, font=\tiny\bfseries] at (2*\xs,0) {p95};
+  \fill[red!75!black] (3*\xs-\bw/2,0) rectangle (3*\xs+\bw/2,2.2*\ys);
+  \node[above, font=\tiny] at (3*\xs,2.2*\ys) {2.2~s};
+  \node[below, font=\tiny\bfseries] at (3*\xs,0) {p99};
+\end{tikzpicture}
+\caption{AI voice agent turn-end-to-agent-start latency at the p50, p95 and p99 percentiles. The shaded band marks the 800--900~ms human-perception threshold; the p50 sits below it, the p95 already crosses it and the p99 is roughly $2.5\times$ the upper edge of the band.}
+\label{fig:voice-latency}
+\end{figure}
+
+This tail is dominated by ASR cold starts and is being investigated as part of the next release cycle.
 
 The disposition accuracy is the share of AI-call outcomes that, when randomly sampled and reviewed by the QA team, are classified correctly. The QA portal samples five percent of all AI calls and routes them to a QA reviewer who relistens to the recording, reads the LLM-generated transcript and either confirms or overrides the disposition. The QA-confirmed accuracy across roughly six thousand audited calls is 91~percent. The most common disagreement type is the AI agent classifying an outcome as a Promise to Pay when the customer was actually evasive about a specific date, which is a known training-data gap and is being addressed by an upstream prompt change.
 
@@ -153,7 +231,7 @@ Active tenants & 4 \\
 Daily messages dispatched (WhatsApp) & 42{,}000 \\
 Daily messages dispatched (SMS) & 18{,}500 \\
 Daily AI calls placed & 9{,}600 \\
-ClickHouse events / day & 2.1~million \\
+Analytics events / day & 2.1~million \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -161,6 +239,6 @@ ClickHouse events / day & 2.1~million \\
 The p99 API latency of 980 milliseconds is dominated by campaign-creation requests where a large CSV is parsed synchronously and is being moved to an asynchronous job. The peak job-queue depth of around 1{,}840 pending jobs is well within the queue's capacity. The daily volume of WhatsApp messages dispatched is several times higher than what a comparable Cloud API deployment could send for a typical lender's budget, consistent with the original rationale for the SIM-based approach.
 
 \section{Failure Modes and Stakeholder Feedback}
-A complete result analysis is incomplete without a record of the failure modes encountered in production. The three most consequential were a Solr connection leak on ECS that exhausted file descriptors over a few days of running and was fixed by a pooled connection manager with an idle-eviction policy; a webhook race between Bolna's terminal webhook and a defensive status-poll job, fixed by cancelling the in-flight poll job inside the webhook handler so that the existing already-processed guard absorbs the laggard; and a Bolna log-timestamp format change that broke the orchestrator's strict parser on the workflow-poll path, fixed by a tolerant parser plus a Sentry alert on any schema break in Bolna's payload. Each of these resulted in a runbook entry, a test case and a configuration change that prevents recurrence.
+A complete result analysis is incomplete without a record of the failure modes encountered in production. The three most consequential were a search-index connection leak that exhausted file descriptors over a few days of running and was fixed by a pooled connection manager with an idle-eviction policy; a race between the voice platform's terminal callback and a defensive status-poll job, fixed by cancelling the in-flight poll job inside the callback handler so that the existing already-processed guard absorbs the laggard; and a timestamp-format change in the voice platform's payload that broke the orchestrator's strict parser on the workflow-poll path, fixed by a tolerant parser plus an alert on any schema break in the inbound payload. Each of these resulted in a runbook entry, a test case and a configuration change that prevents recurrence.
 
 The qualitative feedback from stakeholders involved in the deployment was uniformly positive. Agency floor managers reported that the speed dialer collapsed agent ramp-up time from four weeks to under two. Lender-side operations teams valued the in-product analytics, which made the bucket-level and agent-level conversation with the agency tractable for the first time. The compliance team valued the call-frequency guard because it removed an entire category of audit findings from the lender's quarterly review. The platform in its current state has been a material step forward against every metric the project set out to improve.

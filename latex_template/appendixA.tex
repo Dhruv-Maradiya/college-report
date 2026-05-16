@@ -1,43 +1,65 @@
-\chapter*{Appendix A: Weekly Progress Log}
-\addcontentsline{toc}{chapter}{Appendix A: Weekly Progress Log}
+\chapter*{Appendix A: Selected Platform Capabilities}
+\addcontentsline{toc}{chapter}{Appendix A: Selected Platform Capabilities}
 \markboth{Appendix A}{Appendix A}
 
-The internship ran across twenty-six weeks. The week-by-week log below records, for each week, the principal feature or experiment that occupied that week. The log is the source of the contributions list in Section~3.10 and the failure-mode discussion in Chapter~5.
+The orchestrator exposes a tenant-scoped set of capabilities consumed by the agent dashboard, the desktop client and the automation service. Every request is authenticated either with an end-user token or, for service-to-service calls, with a signed API key. Table~\ref{tab:api-endpoints} lists the most frequently invoked capabilities; the full surface area is documented in the orchestrator's internal API specification.
 
 \begin{table}[H]
 \centering
-\caption{Weekly progress log for the internship.}
-\label{tab:weekly-log}
+\caption{Selected platform capabilities exposed by the orchestrator.}
+\label{tab:api-endpoints}
 \begin{tabularx}{\textwidth}{l X}
 \toprule
-\textbf{Week} & \textbf{Principal work} \\
+\textbf{Capability} & \textbf{Purpose} \\
 \midrule
-1 & Onboarding; environment setup; reading the existing orchestrator codebase and the AA pipeline. \\
-2 & First Jira ticket: a small refactor of the tenant-context propagation across asynchronous boundaries. \\
-3 & Foundations: code review participation; runbook reading; shadowing the on-call rotation. \\
-4 & One-off Python and pandas analysis of forty thousand customer records, leading to the prioritisation findings. \\
-5 & Case listing page on the agent dashboard: paged backend, Solr search wiring, ProTable component. \\
-6 & Case detail page: progressive loading, payment-history strip, AA-signal panel. \\
-7 & Bulk campaign module: creation form, CSV upload, validation preview. \\
-8 & Speed dialer: SSE wiring, disposition form, auto-advance loop; integration of AI calling into the workflow engine. \\
-9 & WhatsApp automation first cut: CLI-based sender, multi-file auth state, anti-ban heuristics. \\
-10 & WhatsApp automation rewrite to a Hono REST API; multi-device rotation; block detection. \\
-11 & Electron desktop application with embedded API server and chat-history scraper; Android SMS sender first cut. \\
-12 & Android SMS sender refinement: native module, background sync task, throttling constants. \\
-13 & Production bug-fix sprint: Solr connection leak, webhook-poll race, Bolna timestamp parse failure. \\
-14 & Voice metrics: standardisation of per-turn latency tags; Prometheus dashboard for cold and warm turns. \\
-15 & QA workflow: QA issue table; reviewer assignment rules; sampling logic for the five-percent audit. \\
-16 & Tenant-configurable column mapping for CSV upload. \\
-17 & WhatsApp number-warm-up scheduling: graduated daily caps for newly added senders. \\
-18 & Speed dialer ergonomics: keyboard-shortcut overlay; disposition pre-fills based on call outcome. \\
-19 & Campaign analytics: live counters; SSE-driven dashboard; per-campaign drill-down. \\
-20 & Workflow migration service: re-mapping in-flight cases when a tenant edits its workflow mid-cycle. \\
-21 & Liquibase migration cleanup; one-time backfill scripts; data-quality checks on the audit log. \\
-22 & WhatsApp message-template editor: tenant-side authoring; preview-with-substitution. \\
-23 & Android SMS reply ingestion: end-to-end test on a real device pool; reliability over flaky network. \\
-24 & Voice agent evaluation: half-built pipeline against a fixed conversation corpus; carried forward as future work. \\
-25 & Documentation and runbook pass; weekly progress consolidation for the report. \\
-26 & Report writing, demo preparation, knowledge-transfer sessions with the team. \\
+List cases             & Paginated case listing for the logged-in agent, with filter and sort options. \\
+Get case detail        & Case detail with progressive sub-resource loading. \\
+Submit disposition     & Triggers workflow advancement and pushes the next case to the agent dashboard. \\
+Get case timeline      & Append-only event log: calls, messages, payments, state changes. \\
+Create campaign        & Create a campaign from a validated CSV preview. \\
+Preview campaign CSV   & Parse and validate an uploaded CSV without persisting. \\
+Start campaign         & Move a scheduled campaign to the ongoing state. \\
+Pause campaign         & Pause an in-flight campaign. \\
+Get campaign metrics   & Live per-campaign counters streamed to the dashboard. \\
+Save workflow          & Persist a tenant workflow definition. \\
+Get workflow           & Fetch a workflow definition for editing or inspection. \\
+Initiate AI call       & Manually trigger an AI voice call for a case. \\
+Voice-platform callback & Inbound terminal callback from the internal voice AI platform. \\
+WhatsApp callback      & Inbound delivery and reply notifications from the automation service. \\
+SMS callback           & Inbound SMS delivery and reply notifications from the Android sender. \\
+Pull next case         & Speed dialer: hand the next case to the current agent. \\
+List QA samples        & Five-percent random sample of AI calls for QA audit. \\
+Submit QA verdict      & Confirm or override the disposition recorded for a sampled call. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\chapter*{Appendix B: Campaign Upload Schema}
+\addcontentsline{toc}{chapter}{Appendix B: Campaign Upload Schema}
+\markboth{Appendix B}{Appendix B}
+
+Campaigns are seeded from a spreadsheet uploaded by the campaign manager. Each row corresponds to one case in the campaign. Table~\ref{tab:csv-schema} documents the fields the upload pipeline expects and validates.
+
+\begin{table}[H]
+\centering
+\caption{Campaign upload schema.}
+\label{tab:csv-schema}
+\begin{tabularx}{\textwidth}{l l c X}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Required} & \textbf{Validation} \\
+\midrule
+Customer name      & text    & yes & Non-blank, up to 100 characters. \\
+Phone number       & text    & yes & International dialling format; duplicates within the file are removed. \\
+Loan account number & text   & yes & Must match the tenant's expected pattern. \\
+Principal amount   & number  & yes & Positive, two decimal places. \\
+EMI amount         & number  & yes & Positive, not greater than the principal amount. \\
+Overdue amount     & number  & yes & Positive, not less than the EMI amount. \\
+Days past due      & integer & yes & Between 1 and 365; out-of-range rows are rejected. \\
+Bucket             & label   & yes & One of the standard bucket labels; cross-checked against the days-past-due value. \\
+Preferred language & label   & no  & Standard language code; defaults to the tenant default. \\
+Promise-to-pay date & date   & no  & A future date in standard ISO format. \\
+Tags               & text    & no  & Free-form comma-separated values; surfaces as filter chips on the dashboard. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+

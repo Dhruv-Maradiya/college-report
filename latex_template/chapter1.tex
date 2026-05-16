@@ -1,7 +1,7 @@
 \chapter{Introduction}
 \label{Chapter 1}
 
-\section{Introduction / Prologue / Background}
+\section{Introduction}
 Retail lending in India has grown dramatically over the last decade. Personal loans, two-wheeler loans, consumer-durable loans, gold loans, credit-card revolving balances, salary advances and a long tail of buy-now-pay-later style products are now offered by a mix of public-sector banks, private banks, small finance banks, non-banking financial companies (NBFCs) and a rapidly multiplying set of digital-only fintech lenders. The flip side of growth in originations is growth in delinquencies. A small but non-trivial percentage of every disbursed cohort fails to pay an installment on or before the due date, and the lender is obliged by Reserve Bank of India (RBI) policy and by basic prudence to chase those installments before the account is allowed to slide into the non-performing-asset bucket.
 
 The chasing of overdue installments is what the industry calls ``collections''. Once an account is more than one day past due (DPD), it enters a structured pipeline of follow-up actions whose intensity and tone escalate with the number of days the account remains unpaid. The classical bucketing in Indian retail collections is shown in Table~\ref{tab:dpd-buckets}.
@@ -25,13 +25,13 @@ NPA      & 120+ days    & Settlement, legal action \\
 
 For most retail products the recovery rate falls off sharply as the bucket deepens. A loan collected in Bucket~0 is recovered cheaply, requires almost no negotiation and does not need a provisioning hit on the lender's balance sheet; a loan that drifts into Bucket~3 or beyond is materially more expensive, often requires settlement at a discount and erodes the customer relationship. The economic case for early-bucket recovery is therefore overwhelming. Operationally, however, early-bucket follow-up is hard at scale: a lender with a hundred thousand active retail loans can easily have eight to twelve thousand accounts in Bucket~0 on any given day, and each needs a contact attempt within a tight cycle. Lenders either build large in-house collections teams or, more commonly, outsource the recovery work in monthly batches to specialised collection agencies who keep a percentage of the recovered amount as commission.
 
-The internship that produced the work documented in this report was carried out at Ignosis, a fintech infrastructure company best known in the Account Aggregator (AA) ecosystem. Over the last eighteen months, the firm has layered a collections suite onto its existing AA platform, reusing the same multi-tenant infrastructure and integrating AA-pulled bank-statement data into collection prioritisation. I joined as a comprehensive-project intern in December 2025 and worked full-time through May 2026, contributing across two GitLab repositories: \texttt{collection-orchestrator}, the Spring Boot backend plus React dashboards that powers the product, and \texttt{collection-scripts}, the TypeScript / Node.js monorepo that contains the WhatsApp automation library, the Electron desktop client and the Android SMS sender. The title of this comprehensive project is \textbf{``AI-Based Collections Platform''}; the platform is a multi-tenant web application that provides a case management dashboard, a bulk campaign module, an autonomous AI voice calling engine, multi-channel outreach automation across WhatsApp and SMS, and analytics on contact rates, agent productivity, call dispositions and recovery percentages.
+The internship that produced the work documented in this report was carried out at Ignosis, a fintech infrastructure company best known in the Account Aggregator (AA) ecosystem. Over the last eighteen months, the firm has layered a collections suite onto its existing AA platform, reusing the same multi-tenant infrastructure and integrating AA-pulled bank-statement data into collection prioritisation. I joined as a comprehensive-project intern on 1 January 2026 and worked full-time through 31 May 2026, contributing to the orchestrator backend and dashboards as well as to a separate automation toolkit containing the WhatsApp service, the desktop client and the Android SMS sender. The title of this comprehensive project is \textbf{``AI-Based Collections Platform''}; the platform is a multi-tenant web application that provides a case management dashboard, a bulk campaign module, an autonomous AI voice calling engine, multi-channel outreach automation across WhatsApp and SMS, and analytics on contact rates, agent productivity, call dispositions and recovery percentages.
 
 \section{Motivation}
 The motivation for this project sits at the intersection of an industry pain point and a technology opening. On the industry side, every percentage point of recovery in Bucket 0 directly improves the lender's Gross Non-Performing Asset (GNPA) metric, reduces provisioning and saves real money. A platform that lifts the early-bucket collection rate from a typical 60--70 percent to the mid-80s -- the target that the Ignosis customer base has set for itself -- is materially valuable to the lender. On the technology side, three developments have made an AI-driven collections platform far more practical than it would have been even three years ago:
 
 \begin{enumerate}
-\item \textbf{Conversational voice models.} Speech-to-text accuracy on Indian-English and on the major Indian regional languages has crossed the threshold at which an AI agent can hold an outbound collection conversation that actually moves the needle. Providers such as Bolna (the partner used in this project) and Smallest.ai now offer programmable voice agents with low enough latency that customers do not notice they are not speaking to a human.
+\item \textbf{Conversational voice models.} Speech-to-text accuracy on Indian-English and on the major Indian regional languages has crossed the threshold at which an AI agent can hold an outbound collection conversation that actually moves the needle. The firm's internal voice AI platform offers programmable voice agents with low enough latency that customers do not notice they are not speaking to a human.
 \item \textbf{Account Aggregator data.} The AA framework allows a lender to fetch the customer's bank statements with explicit consent. This pulls the conversation forward from ``please pay'' to ``we can see your salary was credited yesterday, what is a convenient EMI date for you'' -- a far more effective prompt.
 \item \textbf{Cheap programmatic SIMs.} It is now feasible to operate a bank of consumer-grade SIM cards in a software-controlled rotation, sending WhatsApp messages through real phone numbers and SMS through real Android devices. This bypasses the deliverability ceiling of business APIs.
 \end{enumerate}
@@ -71,13 +71,13 @@ The approach taken on this project was iterative and code-first. Rather than wri
 \section{Scope of the Project}
 The scope of the work undertaken during the internship covers the following:
 \begin{itemize}
-\item Backend contributions to the multi-tenant Spring Boot 3.2 monolith \texttt{collection-orchestrator}, including JPA entities, REST controllers, services, scheduled jobs and Liquibase migrations.
-\item Frontend contributions to the React (UmiJS + Ant Design Pro) dashboard for case management, campaign execution and analytics.
-\item A separate TypeScript / Node.js monorepo, \texttt{collection-scripts}, that contains the WhatsApp automation library based on Baileys, the Electron desktop application, the Android SMS sender app and a Hono REST API server.
-\item A one-off Python-pandas analysis on customer-level transaction and repayment data.
+\item Backend contributions to the multi-tenant orchestrator monolith, including data entities, REST controllers, services, scheduled jobs and schema migrations.
+\item Frontend contributions to the agent dashboard for case management, campaign execution and analytics.
+\item A separate automation toolkit that contains the WhatsApp service, the desktop application, the Android SMS sender app and an internal REST API server.
+\item A one-off analysis on customer-level transaction and repayment data.
 \end{itemize}
 
-The scope explicitly excludes the AI voice agent itself (this is the Bolna service that the team purchased on a vendor basis), the telephony gateway (Exotel), the cloud infrastructure provisioning (AWS), the lender's internal LMS and the regulatory compliance review.
+The scope explicitly excludes the AI voice agent itself (provided by the firm's internal voice AI platform), the telephony gateway, the cloud infrastructure provisioning, the lender's internal LMS and the regulatory compliance review.
 
 \section{Organization of the Rest of the Report}
 
@@ -85,7 +85,7 @@ The remainder of this report is organised as follows.
 
 \textbf{Chapter 2 -- Literature Review.} A review of the relevant prior art: collection-management products in the Indian and global market, AI voice calling and conversational agent research, the WhatsApp multi-device protocol and the academic literature on anti-spam and rate-limiting strategies for messaging platforms. The chapter ends by sharpening the problem statement of Chapter~1 into a set of concrete engineering requirements.
 
-\textbf{Chapter 3 -- Proposed Methodology and Implementation.} A detailed description of the development methodology used at Ignosis and of the specific modules contributed during the internship. The chapter walks through the case management subsystem, the workflow engine, the campaign module, the AI voice calling integration, the WhatsApp automation library, the Electron desktop application and the Android SMS sender app.
+\textbf{Chapter 3 -- Proposed Methodology and Implementation.} A detailed description of the development methodology used at Ignosis and of the specific modules contributed during the internship. The chapter walks through the case management subsystem, the workflow engine, the campaign module, the AI voice calling integration, the WhatsApp automation, the desktop application and the Android SMS sender app.
 
 \textbf{Chapter 4 -- Software Design.} A design-level view of the platform: design goals, component decomposition, the data model, the API surface, sequence flows for the principal use cases, the deployment view and the security design.
 

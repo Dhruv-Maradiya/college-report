@@ -15,8 +15,8 @@ The platform was designed against a small, prioritised set of goals. Tenant isol
 \toprule
 \textbf{Goal} & \textbf{Design implication} \\
 \midrule
-Tenant isolation by default & Per-tenant Keycloak realm, per-tenant Solr core, tenant-scoped JPA queries, thread-local tenant context propagated across asynchronous boundaries. \\
-Configurable collection policy & Workflow stored as data (nodes plus MVEL transitions), not code. Tenant edits do not require a deployment. \\
+Tenant isolation by default & Per-tenant identity realm, per-tenant search partition, tenant-scoped database queries, thread-local tenant context propagated across asynchronous boundaries. \\
+Configurable collection policy & Workflow stored as data (nodes plus boolean transitions), not as code. Tenant edits do not require a deployment. \\
 Multi-channel orchestration & Channels are workflow action types. Adding a new channel reduces to adding a new node type, not rewriting the orchestrator. \\
 Auditability & Every state transition writes a row to the case timeline; every outbound action carries an idempotency key. \\
 Graceful degradation & Database-backed job queue, per-job retry policy with exponential backoff, dead-letter handling for permanent failures. \\
@@ -27,35 +27,35 @@ Cost-aware channels & SIM-based WhatsApp and SMS rather than vendor-priced APIs;
 
 \section{Component Decomposition}
 
-The platform decomposes into seven major components, each owning a well-defined slice of the system surface. Inter-component communication is exclusively over HTTP with API-key or JWT authentication; within a component, the layering is conventional (controller, service, repository on the Spring Boot side; page, hook, service on the React side) and is enforced by review rather than by package boundaries. Table~\ref{tab:components} lists the components.
+The platform decomposes into seven major components, each owning a well-defined slice of the system surface. Inter-component communication is exclusively over HTTP with API-key or token-based authentication; within a component, the layering is conventional and is enforced by review rather than by package boundaries. Table~\ref{tab:components} lists the components.
 
 \begin{table}[H]
 \centering
 \caption{Major components of the platform.}
 \label{tab:components}
-\begin{tabularx}{\textwidth}{l l X}
+\begin{tabularx}{\textwidth}{l X}
 \toprule
-\textbf{Component} & \textbf{Stack} & \textbf{Responsibility} \\
+\textbf{Component} & \textbf{Responsibility} \\
 \midrule
-Orchestrator API & Java 17, Spring Boot 3.2 & Case management, workflow engine, campaign module, scheduled jobs, webhook handlers. \\
-Agent Dashboard & React, UmiJS, Ant Design Pro & Browser-facing UI for human agents and campaign managers. \\
-Automation API & Hono, Node.js & Driver for the WhatsApp sender pool; bridges the orchestrator to Baileys. \\
-Electron Client & Electron, embedded Hono & Operator-side desktop application; locally-paired WhatsApp workers; daily scraping. \\
-Android Sender App & React Native, Expo & SMS dispatch from a real consumer SIM; nightly SMS ingestion. \\
-Identity Layer & Keycloak & SSO; per-tenant realm; federation to lender IdPs. \\
-Search and Analytics & Apache Solr, ClickHouse & Per-tenant case search; event store for the dashboard and the data team. \\
+Orchestrator backend & Case management, workflow engine, campaign module, scheduled jobs, callback handlers. \\
+Agent dashboard     & Browser-facing UI for human agents and campaign managers. \\
+Automation service  & Driver for the WhatsApp sender pool; bridges the orchestrator to the protocol library. \\
+Desktop client      & Operator-side desktop application; locally-paired WhatsApp workers; daily scraping. \\
+Android sender app  & SMS dispatch from a real consumer SIM; nightly SMS ingestion. \\
+Identity layer      & Single sign-on; per-tenant realm; federation to lender identity providers. \\
+Search and analytics & Per-tenant case search; event store for the dashboard and the data team. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \section{Data Model}
 
-The data model is a normalised relational schema in PostgreSQL, with denormalised projections cached in Solr for search and in ClickHouse for analytics. The most important relationship in this model is the one between \texttt{Case} and \texttt{UserAllocation}: the case is a stable handle on the customer's relationship with the lender, while the allocation is the cycle-specific projection that the workflow engine drives. Splitting the two keeps the case timeline append-only across cycles and lets a case carry its history forward even when its workflow position is reset at the start of a new cycle. The append-only \texttt{CaseEvent} table is the second important design choice: every action the platform takes against a case appends a row, so queries that show the timeline read from this table directly while queries that need the current state read materialised columns on \texttt{Case} and \texttt{UserAllocation}. This separation keeps the live tables small and the timeline easy to audit.
+The data model is a normalised relational schema, with denormalised projections cached in a search index for queries and in an analytics event store for reporting. The most important relationship is the one between the case and its per-cycle allocation: the case is a stable handle on the customer's relationship with the lender, while the allocation is the cycle-specific projection that the workflow engine drives. Splitting the two keeps the case timeline append-only across cycles and lets a case carry its history forward even when its workflow position is reset at the start of a new cycle. The append-only case-event table is the second important design choice: every action the platform takes against a case appends a row, so queries that show the timeline read from this table directly while queries that need the current state read materialised columns on the case and the allocation. This separation keeps the live tables small and the timeline easy to audit.
 
 \section{Principal Flow: AI Voice Call}
 
-The AI voice call is the most architecturally instructive flow because it crosses every major component and exercises the workflow engine on both the outbound and the inbound side. The orchestrator's scheduler reaches an AI-call node for a case, schedules a call-initiate job, and a defensive status-poll job five minutes later. The job executor pulls the next from-number, builds the Bolna payload and POSTs it; Bolna conducts the call through Exotel and POSTs a terminal webhook at completion. The webhook processor persists the disposition, cancels the poll job, emits Prometheus metrics, and the engine evaluates the outgoing transitions of the current node so the workflow advances on the same request. Two non-obvious points: the defensive poll job exists because the Bolna webhook is best-effort and a polling fallback ensures the case is never indefinitely parked, and the cancellation is implemented as a soft cancel (the poll job runs, observes the case already terminated and exits) which is more robust against database eventual consistency than a hard cancel would be.
+The AI voice call is the most architecturally instructive flow because it crosses every major component and exercises the workflow engine on both the outbound and the inbound side. The orchestrator's scheduler reaches an AI-call node for a case, schedules a call-initiate job, and a defensive status-poll job five minutes later. The job executor pulls the next from-number, builds the request and hands it to the internal voice AI platform; the platform conducts the call through the telephony gateway and returns a terminal callback at completion. The callback processor persists the disposition, cancels the poll job, emits metrics, and the engine evaluates the outgoing transitions of the current node so the workflow advances on the same request. Two non-obvious points: the defensive poll job exists because the callback is best-effort and a polling fallback ensures the case is never indefinitely parked, and the cancellation is implemented as a soft cancel (the poll job runs, observes the case already terminated and exits) which is more robust against database eventual consistency than a hard cancel would be.
 
 \section{Security Design}
 
-The security design rests on independent layers so that a breach of one does not compromise the layers below. Users authenticate against Keycloak with short-lived per-realm-signed JWTs. Every API call resolves the tenant identifier from the URL prefix and rejects any JWT whose realm does not match, and a thread-local tenant context propagates the tenant identity through every downstream call including across asynchronous boundaries. Role-based access control is enforced both at the controller layer (Spring Security) and at the dashboard layer; every JPA query is scoped to the tenant, every Solr query is routed to the tenant's core, every ClickHouse query carries the tenant tag in its filter, with cross-tenant queries forbidden at the repository layer. Inbound webhooks are authenticated with an HMAC over the body or with a monthly-rotated API key, with the secret in AWS Secrets Manager. A separate set of compliance controls -- call-frequency guards, do-not-call honour periods, PII access logging, recording retention -- is enforced uniformly across all tenants regardless of individual configuration.
+The security design rests on independent layers so that a breach of one does not compromise the layers below. Users authenticate against the identity layer with short-lived signed tokens. Every API call resolves the tenant identifier from the URL prefix and rejects any token whose realm does not match, and a thread-local tenant context propagates the tenant identity through every downstream call including across asynchronous boundaries. Role-based access control is enforced both on the backend and on the dashboard; every database query is scoped to the tenant, every search query is routed to the tenant's partition, every analytics query carries the tenant tag in its filter, with cross-tenant queries forbidden at the data-access layer. Inbound callbacks are authenticated with a signed body digest or with a monthly-rotated API key, with the secret kept in the cloud provider's secrets manager. A separate set of compliance controls -- call-frequency guards, do-not-call honour periods, PII access logging, recording retention -- is enforced uniformly across all tenants regardless of individual configuration.

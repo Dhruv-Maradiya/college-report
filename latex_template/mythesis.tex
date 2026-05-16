@@ -4,9 +4,11 @@
 \input{rgb}
 \usepackage{setspace}
 \onehalfspacing
+\usepackage[T1]{fontenc}
 \usepackage{times}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{latexsym}
 \usepackage{enumerate}
@@ -34,8 +36,24 @@
 
 \usepackage{titlesec}
 \titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{15pt}{\Huge}
-\titlespacing*{\chapter}{0pt}{-30pt}{20pt}
+  {\normalfont\fontsize{18}{22}\selectfont\bfseries}
+  {\fontsize{18}{22}\selectfont\bfseries\chaptertitlename\ \thechapter}
+  {4pt}
+  {\fontsize{18}{22}\selectfont\bfseries}
+\titlespacing*{\chapter}{0pt}{-40pt}{8pt}
+
+\titleformat{\section}
+  {\normalfont\fontsize{14}{17}\selectfont\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\fontsize{14}{17}\selectfont\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{14}{17}\selectfont\bfseries}{\thesubsubsection}{1em}{}
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\titlespacing*{\subsubsection}{0pt}{4pt}{2pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6\baselineskip}
 
 \pagestyle{plain}
 
@@ -60,55 +78,38 @@
 
 \begin{titlepage}
 \noindent
+\setlength{\parskip}{0pt}
 \begin{center}
 {\color{black}
-{\Huge {\bf ``AI-Based Collections Platform''\\
-\vspace{1cm}
-}}}
-\end{center}
-\begin{center}
-{\color{black}
-{\normalsize \bf Comprehensive Project Report\\}}
-\end{center}
-\vspace{0.2cm}
-\begin{center}
-{\color{black}\textrm{\normalsize Submitted in Partial Fulfilment of the\\Requirements for the Degree of}}
-\end{center}
+{\Huge\bfseries ``AI-Based Collections Platform''\par}}
 \vspace{0.5cm}
-\begin{center}
-{\color{black}
-{\large {\bf BACHELOR OF TECHNOLOGY\\ IN \\ COMPUTER SCIENCE \& ENGINEERING
-\vspace{0.1cm}
-}}}
-\end{center}
-\begin{center}
-{\color{black}\textrm{By \\
-        {\bf Dhruv Maradiya \\
-        22BCP480D} \\
-}}
-\end{center}
-\vspace{0.1cm}
 
-\begin{center}
-{\color{black}\textrm{Under the Guidance of \\
-        {\bf Dr. Punit Gupta} \\
-          Assistant Professor, Department of CSE\\
-Pandit Deendayal Energy University\\}}
-\end{center}
-\begin{figure}[h]
-\centerline{\includegraphics[width=4.1cm,height=4.1cm]{images/logo.png}}
-\end{figure}
-\vspace{0.2cm}
+{\color{black}{\normalsize\bfseries Comprehensive Project Report\par}}
+\vspace{0.25cm}
 
-\begin{center}
-{\color{black}\textrm{\bf Department of Computer Science and Engineering\\
-School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, INDIA, 382426}
-}
-\vspace{1cm}
-\end{center}
-\begin{center}
-{\color{black}\textrm{\bf May 2026}
-}
+{\color{black}\normalsize Submitted in Partial Fulfilment of the\\Requirements for the Degree of\par}
+\vspace{0.4cm}
+
+{\color{black}{\large\bfseries BACHELOR OF TECHNOLOGY\\ IN \\ COMPUTER SCIENCE \& ENGINEERING\par}}
+\vspace{0.4cm}
+
+{\color{black}By\\{\bfseries Dhruv Maradiya\\22BCP480D}\par}
+\vspace{0.35cm}
+
+{\color{black}Under the Guidance of\\{\bfseries Dr.~Punit Gupta}\\Assistant Professor, Department of CSE\\Pandit Deendayal Energy University\par}
+\vspace{0.3cm}
+
+{\color{black}Industry Mentor\\{\bfseries Mr.~Rahi Shah}\\Engineering Lead\\Ignosis, Ahmedabad\par}
+\vspace{0.35cm}
+
+\includegraphics[width=3.4cm,height=3.4cm]{images/logo.png}
+\vspace{0.3cm}
+
+{\color{black}{\bfseries Department of Computer Science and Engineering\\
+School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, INDIA, 382426\par}}
+\vspace{0.35cm}
+
+{\color{black}{\bfseries May 2026\par}}
 \end{center}
 \end{titlepage}
 
@@ -116,16 +117,37 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 
 \include{declaration}
 \include{certificate1}
-\include{certificate2}
-\include{certificate3}
 \include{acknowledgement}
 
 \input{abstract.tex}
 \addcontentsline{toc}{chapter}{Abstract}
 \clearpage
 
+\begingroup
 \renewcommand{\contentsname}{Index}
 \addcontentsline{toc}{chapter}{Index}
+\setlength{\parskip}{0pt}
+\small
+\linespread{0.9}\selectfont
+\makeatletter
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1pt \@plus\p@
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+\renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+\makeatother
 \tableofcontents
 \clearpage
 
@@ -136,6 +158,7 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
 \clearpage
+\endgroup
 
 \input{abbreviations}
 \clearpage
@@ -149,9 +172,9 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 \input{chapter5}
 \input{chapter6}
 
-\input{appendixA.tex}
-
-\addcontentsline{toc}{chapter}{Bibliography}
+\addcontentsline{toc}{chapter}{References}
 \input{references}
+
+\input{appendixA.tex}
 
 \end{document}

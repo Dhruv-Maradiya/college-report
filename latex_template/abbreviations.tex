@@ -5,6 +5,9 @@
 \end{center}
 \vspace{0.4cm}
 
+\noindent\textbf{\large 1. Abbreviations}
+\vspace{0.2cm}
+
 \noindent
 \begin{longtable}{@{}p{0.18\textwidth} p{0.78\textwidth}@{}}
 \toprule
@@ -21,43 +24,62 @@ AA & Account Aggregator (RBI framework for consented financial-data sharing) \\
 AI & Artificial Intelligence \\
 API & Application Programming Interface \\
 ASR & Automatic Speech Recognition \\
-AWS & Amazon Web Services \\
 BPTP & Broken Promise To Pay \\
 CSV & Comma-Separated Values \\
 DPD & Days Past Due \\
-DTO & Data Transfer Object \\
 FIU & Financial Information User (Account Aggregator role) \\
 GNPA & Gross Non-Performing Asset \\
 HTTP & Hypertext Transfer Protocol \\
 IST & Indian Standard Time \\
-JPA & Java Persistence API \\
-JWT & JSON Web Token \\
 KYC & Know Your Customer \\
-LID & Linked Device Identifier (WhatsApp opaque participant identifier) \\
 LLM & Large Language Model \\
 LMS & Loan Management System \\
-MVEL & MVFLEX Expression Language \\
 NBFC & Non-Banking Financial Company \\
-OIDC & OpenID Connect \\
-ORM & Object--Relational Mapping \\
 OTP & One-Time Password \\
 PTP & Promise To Pay \\
 QA & Quality Assurance \\
 RBI & Reserve Bank of India \\
-REST & Representational State Transfer \\
-SDK & Software Development Kit \\
-SES & Simple Email Service (AWS) \\
 SIM & Subscriber Identity Module \\
 SMS & Short Message Service \\
-SOLR & Search Server on top of Lucene \\
 SSO & Single Sign-On \\
-SSE & Server-Sent Events \\
 TLS & Transport Layer Security \\
 TTS & Text-to-Speech \\
 UI & User Interface \\
-ULID & Universally Unique Lexicographically Sortable Identifier \\
 UPI & Unified Payments Interface \\
-UUID & Universally Unique Identifier \\
 WA & WhatsApp \\
+\end{longtable}
+
+\vspace{0.6cm}
+\noindent\textbf{\large 2. Subscripts}
+\vspace{0.2cm}
+
+\noindent
+\begin{longtable}{@{}p{0.18\textwidth} p{0.78\textwidth}@{}}
+\toprule
+\textbf{Subscript} & \textbf{Meaning} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Subscript} & \textbf{Meaning} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+0       & Bucket 0 (1--30 days past due) \\
+1       & Bucket 1 (31--60 days past due) \\
+2       & Bucket 2 (61--90 days past due) \\
+3       & Bucket 3 (91--120 days past due) \\
+t       & Time index (cycle day, $t = 0, 1, \ldots, 30$) \\
+c       & Channel index (call, AI, WhatsApp, SMS) \\
+i       & Case / customer index within a campaign \\
+j       & Sender index within a WhatsApp sender pool \\
+k       & Attempt number for a given case--channel pair \\
+n       & Total number of cases in a campaign \\
+p50     & 50\textsuperscript{th} percentile (median) of a latency distribution \\
+p95     & 95\textsuperscript{th} percentile of a latency distribution \\
+p99     & 99\textsuperscript{th} percentile of a latency distribution \\
+cum     & Cumulative value across attempts \\
+max     & Maximum allowed (e.g., daily message cap) \\
+min     & Minimum allowed (e.g., inter-message jitter floor) \\
 \end{longtable}
 \clearpage
