@@ -2,7 +2,7 @@
 \addcontentsline{toc}{chapter}{Appendix A: Selected Platform Capabilities}
 \markboth{Appendix A}{Appendix A}
 
-The orchestrator exposes a tenant-scoped set of capabilities consumed by the agent dashboard, the desktop client and the automation service. Every request is authenticated either with an end-user token or, for service-to-service calls, with a signed API key. Table~\ref{tab:api-endpoints} lists the most frequently invoked capabilities; the full surface area is documented in the orchestrator's internal API specification.
+The orchestrator exposes a tenant-scoped set of capabilities used by the agent dashboard, the desktop client and the automation service. Every request is authenticated either with an end-user token or, for service-to-service calls, with a signed API key. Table~\ref{tab:api-endpoints} lists the capabilities that are exercised most often; the full surface is documented in the orchestrator's internal API specification.
 
 \begin{table}[H]
 \centering
@@ -38,7 +38,7 @@ Submit QA verdict      & Confirm or override the disposition recorded for a samp
 \addcontentsline{toc}{chapter}{Appendix B: Campaign Upload Schema}
 \markboth{Appendix B}{Appendix B}
 
-Campaigns are seeded from a spreadsheet uploaded by the campaign manager. Each row corresponds to one case in the campaign. Table~\ref{tab:csv-schema} documents the fields the upload pipeline expects and validates.
+Campaigns are seeded from a spreadsheet the campaign manager uploads. Each row in that spreadsheet corresponds to one case in the campaign. Table~\ref{tab:csv-schema} captures the fields the upload pipeline expects and the validation rules each one is run through.
 
 \begin{table}[H]
 \centering

@@ -1,0 +1,145 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage{color}
+\input{rgb}
+%\usepackage{fix-cm}
+%\fontsize{16}{120}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{url}
+\usepackage{afterpage}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+%\usepackage[dvips]{color}
+\usepackage{epsfig}
+\usepackage{graphics}
+%\usepackage{ulem}
+\usepackage{textcomp}
+\pagestyle{plain}
+\usepackage{color}
+\bibliographystyle{abbrv}
+%\newtheorem{definition}{Definition}
+%\newtheorem{example}{Example}
+%\usepackage{float}
+\usepackage{xspace}
+\textwidth=14.945cm
+\oddsidemargin=0.5cm
+\evensidemargin=0.5cm
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+\noindent
+\begin{center}
+%\setlength{\baselineskip}{2\baselineskip}
+{\color{black}
+{\Huge {\bf Title of Your Project \\ Line 2\\
+\vspace{.2cm}
+ }}}
+\end{center}
+\newcommand{\TitleStyle}[1]{{\Large \textbf{#1}}}
+\newcommand{\TitleSpace}{\vspace{2pt}}
+\vspace{1cm}
+\begin{center}
+{\color{black}\textrm{A Industrial Internship report Submitted in Partial Fulfillment of the Requirements for Award\\
+ of\\
+ the Degree of Bachelor of Technology in Computer science and engineering}}
+\end{center}
+\vspace{0.5cm}
+\begin{center}
+%\includegraphics[height=4.0cm]{logo}
+\end{center}
+\vspace{0.5cm}
+\begin{center}
+{\color{black}\textrm{Submitted by \\
+        {\bf Your Name} \\
+        Roll No. Your Roll No}}
+\end{center}
+\vspace{0.3cm}
+\begin{center}
+{\color{black}\textrm{Hackathon Team ID\\
+        {\bf XXXX } \\
+          \\
+          Title of the Problem Statement\\}}
+\end{center}
+\vspace{\fill}
+\vspace{0.2cm}
+\begin{center}
+{\color{black}\textrm{Submitted to \\ Department of Computer Science and Technology\\
+School of Technology \\
+Pandit Deendayal Energy University (PDEU)\\Gandhinagar, INDIA, 382007}
+} 
+\end{center}
+
+\end{titlepage}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\thispagestyle{empty}
+\newlength{\origpar}
+\setlength{\origpar}{\parindent}
+\setlength{\parindent}{0pt}
+
+\setlength{\parindent}{\origpar}
+\include{declaration}
+\include{certificate1}
+\include{certificate2}
+\include{certificate3}
+%\addcontentsline{toc}{chapter}{Acknowledgment}
+\include{acknowledgement}
+\setlength{\parindent}{\origpar}
+\input{abstract.tex}
+\addcontentsline{toc}{chapter}{Abstract}
+\clearpage
+
+\addcontentsline{toc}{chapter}{Contents}
+
+\tableofcontents
+%\clearpage
+%\addcontentsline{toc}{chapter}{List of Figures}
+%\listoffigures 
+%\clearpage
+%\addcontentsline{toc}{chapter}{List of Tables}
+%\listoftables 
+
+\clearpage
+
+\pagenumbering{arabic}
+
+\input{chapter1}
+\newpage
+
+\input{chapter2}
+\newpage
+
+%include all chapters here
+\include{conclusions}
+
+\newpage
+%include appendexes here
+\input{appendixA.tex}
+
+
+%The following adds references to the table of contents
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{IEEEtran}
+\input{references}
+
+
+
+\end{document}
+
+
+
+

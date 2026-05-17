@@ -2,16 +2,16 @@
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {1.1}{\ignorespaces Collection buckets typical to Indian retail-lending portfolios.}}{1}{table.caption.4}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces Comparison of conversational voice-agent stacks evaluated for the platform.}}{8}{table.caption.5}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Comparison of conversational voice-agent stacks evaluated for the platform.}}{7}{table.caption.5}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Prioritised design goals.}}{19}{table.caption.8}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Major components of the platform.}}{20}{table.caption.9}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Prioritised design goals.}}{20}{table.caption.8}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Major components of the platform.}}{21}{table.caption.9}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Headline outcomes from the production deployment.}}{22}{table.caption.10}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Contact rate by channel and attempt.}}{23}{table.caption.11}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces WhatsApp sender ban distribution.}}{25}{table.caption.14}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces System-level metrics across the production deployment.}}{27}{table.caption.16}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Headline outcomes from the production deployment.}}{23}{table.caption.10}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Contact rate by channel and attempt.}}{24}{table.caption.11}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces WhatsApp sender ban distribution.}}{26}{table.caption.14}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces System-level metrics across the production deployment.}}{28}{table.caption.16}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Selected platform capabilities exposed by the orchestrator.}}{34}{table.caption.19}%
-\contentsline {table}{\numberline {6.2}{\ignorespaces Campaign upload schema.}}{35}{table.caption.21}%
+\contentsline {table}{\numberline {6.1}{\ignorespaces Selected platform capabilities exposed by the orchestrator.}}{35}{table.caption.19}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Campaign upload schema.}}{36}{table.caption.21}%

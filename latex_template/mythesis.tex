@@ -31,8 +31,9 @@
 \usepackage{caption}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,calc,backgrounds}
+\usepackage{eso-pic}
 
-\usepackage[a4paper, top=1in, bottom=1in, left=1.5in, right=1in]{geometry}
+\usepackage[a4paper, top=1in, bottom=1in, left=1.5in, right=1in, footskip=18pt]{geometry}
 
 \usepackage{titlesec}
 \titleformat{\chapter}[display]
@@ -74,9 +75,7 @@
   belowskip=0.6em
 }
 
-\begin{document}
-
-\begin{titlepage}
+\newcommand{\titlepagecontent}{%
 \noindent
 \setlength{\parskip}{0pt}
 \begin{center}
@@ -90,7 +89,7 @@
 {\color{black}\normalsize Submitted in Partial Fulfilment of the\\Requirements for the Degree of\par}
 \vspace{0.4cm}
 
-{\color{black}{\large\bfseries BACHELOR OF TECHNOLOGY\\ IN \\ COMPUTER SCIENCE \& ENGINEERING\par}}
+{\color{black}{\large\bfseries BACHELOR OF TECHNOLOGY\\ IN \\ COMPUTER ENGINEERING\par}}
 \vspace{0.4cm}
 
 {\color{black}By\\{\bfseries Dhruv Maradiya\\22BCP480D}\par}
@@ -110,7 +109,24 @@ School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, IN
 \vspace{0.35cm}
 
 {\color{black}{\bfseries May 2026\par}}
-\end{center}
+\end{center}%
+}
+
+\begin{document}
+
+% Double-line decorative border on every page, drawn natively by TikZ.
+% `double` + `double distance` gives a real double-stroke; we don't need
+% two rectangles. Border insets: 0.7 in left (binding), 0.5 in everywhere else.
+\AddToShipoutPictureBG{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw[double, double distance=1.5pt, line width=0.5pt]
+      ($(current page.south west)+(0.7in, 0.5in)$) rectangle
+      ($(current page.north east)+(-0.5in, -0.5in)$);
+  \end{tikzpicture}%
+}
+
+\begin{titlepage}
+\titlepagecontent
 \end{titlepage}
 
 \pagenumbering{roman}

@@ -1,0 +1,66 @@
+% Standalone build of only the title page, no border.
+% Pulls the title-page content from mythesis.tex via shared snippet.
+
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{color}
+\input{rgb}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+\usepackage[a4paper, top=1in, bottom=1in, left=1.5in, right=1in]{geometry}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+\pagestyle{empty}
+
+\newcommand{\titlepagecontent}{%
+\noindent
+\setlength{\parskip}{0pt}
+\begin{center}
+{\color{black}
+{\Huge\bfseries ``AI-Based Collections Platform''\par}}
+\vspace{0.5cm}
+
+{\color{black}{\normalsize\bfseries Comprehensive Project Report\par}}
+\vspace{0.25cm}
+
+{\color{black}\normalsize Submitted in Partial Fulfilment of the\\Requirements for the Degree of\par}
+\vspace{0.4cm}
+
+{\color{black}{\large\bfseries BACHELOR OF TECHNOLOGY\\ IN \\ COMPUTER ENGINEERING\par}}
+\vspace{0.4cm}
+
+{\color{black}By\\{\bfseries Dhruv Maradiya\\22BCP480D}\par}
+\vspace{0.35cm}
+
+{\color{black}Under the Guidance of\\{\bfseries Dr.~Punit Gupta}\\Assistant Professor, Department of CSE\\Pandit Deendayal Energy University\par}
+\vspace{0.3cm}
+
+{\color{black}Industry Mentor\\{\bfseries Mr.~Rahi Shah}\\Engineering Lead\\Ignosis, Ahmedabad\par}
+\vspace{0.35cm}
+
+\includegraphics[width=3.4cm,height=3.4cm]{images/logo.png}
+\vspace{0.3cm}
+
+{\color{black}{\bfseries Department of Computer Science and Engineering\\
+School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, INDIA, 382426\par}}
+\vspace{0.35cm}
+
+{\color{black}{\bfseries May 2026\par}}
+\end{center}%
+}
+
+\begin{document}
+
+\begin{titlepage}
+\titlepagecontent
+\end{titlepage}
+
+\end{document}

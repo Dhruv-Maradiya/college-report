@@ -1,10 +1,10 @@
 \chapter{Results and Discussion}
 \label{Chapter 5}
 
-This chapter reports the quantitative and qualitative results obtained from the deployment of the AI-Based Collections Platform across the four lender tenants that were active in production during the latter half of the internship. The numbers are pulled from the in-product analytics warehouse and from the operational dashboards that the engineering team maintains. Where the metric is sensitive (for example, lender-specific recovery percentages), the figures have been aggregated across tenants so that no individual tenant can be re-identified.
+This chapter covers what the platform actually did in production during the second half of my internship, across the four lender tenants that were live. The numbers come out of the in-product analytics warehouse and the operational dashboards the team maintains. Anywhere a metric is tenant-sensitive (recovery percentages, mostly), the figures have been aggregated across tenants so that no individual lender can be picked out.
 
 \section{Outcomes of the Proposed Platform}
-The headline outcomes that the platform demonstrated in production over the three months that ran in parallel with the internship are summarised in Table~\ref{tab:headline}. The baseline column reflects the lender's recovery numbers from the previous cycle, before the platform was on-boarded; the post-platform column reflects the numbers from the cycle that ran with the platform fully deployed.
+The headline numbers from the three months of production that overlapped with the internship are in Table~\ref{tab:headline}. The baseline column is the lender's recovery numbers from the cycle before the platform was onboarded. The post-platform column is from the cycle that ran with the platform fully deployed.
 
 \begin{table}[H]
 \centering
@@ -24,10 +24,10 @@ WhatsApp deliverability & 71\% & 92\% & +21 \\
 \end{tabularx}
 \end{table}
 
-The Bucket~0 collection rate -- the percentage of cases newly entering Bucket~0 that are recovered within the same monthly cycle -- is the metric the platform is judged on. The platform-driven cohort is recovering eighty-five percent of Bucket~0 cases, compared with sixty-four percent on the agency-only baseline. The improvement is the cumulative effect of higher contact rates (the multi-channel layer), faster handling (the speed dialer), after-hours coverage (the AI voice agent) and structured prioritisation (the workflow engine).
+The Bucket~0 collection rate -- the share of cases newly entering Bucket~0 that get recovered inside the same monthly cycle -- is the single number the platform is judged on. The platform-driven cohort is recovering 85 percent of Bucket~0 cases, against the 64 percent agency-only baseline. The improvement is the cumulative effect of four things: higher contact rates from the multi-channel layer, faster per-case handling from the speed dialer, after-hours coverage from the AI voice agent, and structured prioritisation from the workflow engine.
 
 \section{Channel-Level Contact Rates}
-A second view of the results breaks the contact rate by channel and by attempt number. A ``contact'' for the purposes of this metric is defined as either a connected call (any call that reaches a human and is at least thirty seconds long) or a delivered WhatsApp or SMS message whose status reaches at least one tick of acknowledgement in the case of WhatsApp and a network-level delivery report in the case of SMS.
+A second cut at the numbers breaks the contact rate down by channel and by attempt number. For this metric a ``contact'' is either a connected call (any call that reaches a human and lasts at least thirty seconds), or a delivered WhatsApp message (status reaches at least one acknowledgement tick), or a delivered SMS (network-level delivery report).
 
 \begin{table}[H]
 \centering
@@ -91,14 +91,14 @@ Figure~\ref{fig:channel-bars} renders the same data as a grouped bar chart, whic
 \label{fig:channel-bars}
 \end{figure}
 
-Three observations follow from Table~\ref{tab:channel-contact}. The AI voice agent's first-attempt contact rate of 41~percent is close to the human agent's 48~percent, reflecting the maturity of the internal voice AI platform. WhatsApp is the highest-deliverability channel: even a cold first message via a SIM-based WhatsApp number reaches the customer in 88~percent of cases. The combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92~percent of customers on the first attempt and 96~percent cumulatively, well above what any single-channel strategy can achieve.
+Three things stand out in Table~\ref{tab:channel-contact}. The AI voice agent's first-attempt contact rate of 41 percent is not far behind the human agent's 48 percent, which says a lot about how good the internal voice AI platform has become. WhatsApp is the highest-deliverability channel by some distance -- even a cold first message from a SIM-based number reaches the customer in 88 percent of cases. And the combined ``any channel'' line shows that with multi-channel orchestration the platform reaches 92 percent of customers on the first attempt and 96 percent cumulatively, well above what any single channel on its own can deliver.
 
 \section{Speed Dialer Throughput}
-Before the speed dialer was introduced, a typical agent on the platform handled between forty and fifty calls in an eight-hour shift. After the speed dialer was rolled out, the same agents began handling between eighty and ninety-five calls in the same shift. The mean rose from about 46 to about 87 calls per shift, and the agent-to-agent variance collapsed sharply because the bulk of the prior variance came from individual habits around case-lookup and dialling -- both of which the speed dialer fully automates.
+Before the speed dialer existed, a typical agent handled between forty and fifty calls in an eight-hour shift. After it rolled out, the same agents were doing eighty to ninety-five calls in the same shift. The mean moved from about 46 to about 87 calls per shift, and the variance between agents collapsed sharply -- most of the prior variance had been about individual habits around case-lookup and dialling, both of which the speed dialer now does for everyone.
 
-The handle time per call also fell substantially. Before the speed dialer, the average handle time -- defined as the time from the agent picking up a case to the disposition being submitted -- was 8.3 minutes. After the rollout it fell to 4.6 minutes. The decomposition of that 3.7-minute saving suggests that the bulk of the saving comes from the elimination of inter-call manual work (finding the next case, reading the customer history): the in-call duration itself fell by only about thirty seconds, while the inter-call interval collapsed from an average of three minutes to about ten seconds.
+Per-call handle time fell too. Before the speed dialer the average handle time -- measured from the agent picking up a case to submitting a disposition -- was 8.3 minutes. After the rollout it was 4.6 minutes. Pulling that 3.7-minute saving apart, almost all of it comes from killing the inter-call manual work (finding the next case, skimming the history) rather than from anything happening during the call itself. The in-call duration only fell by about thirty seconds. The gap between calls dropped from three minutes to roughly ten seconds.
 
-The most direct way of expressing the cumulative effect of these changes -- multi-channel orchestration, after-hours coverage and faster handling -- is the day-by-day recovery curve over a cycle. Figure~\ref{fig:recovery-curve} plots, for the same cohort of allocated cases, the percentage that has been recovered by the end of each day of the thirty-day collection cycle, under the agency-only baseline and under the platform. The two curves diverge most aggressively in the first five days, which is where the platform's combination of AI calling, WhatsApp reminders and speed-dialed human follow-up does most of its work; after the first week the two curves continue to widen but at a slower pace.
+The cleanest single picture of the combined effect of all this -- multi-channel orchestration, after-hours coverage and faster handling -- is the day-by-day recovery curve over a cycle. Figure~\ref{fig:recovery-curve} plots, for the same cohort of allocated cases, the share recovered by the end of each day of the thirty-day collection cycle, under the agency-only baseline and under the platform. The two curves diverge most sharply in the first five days, which is where the combination of AI calling, WhatsApp reminders and speed-dialed human follow-up does most of its work. After the first week the two curves keep widening, but more slowly.
 
 \begin{figure}[H]
 \centering
@@ -148,7 +148,7 @@ The most direct way of expressing the cumulative effect of these changes -- mult
 \end{figure}
 
 \section{WhatsApp Sender Pool Behaviour}
-The WhatsApp sender pool is the most operationally sensitive sub-system of the platform. Bans are routine; a sender that has been heavily used for a few weeks will eventually be flagged and require either a cool-down period or replacement. Table~\ref{tab:wa-bans} reports the empirical ban distribution observed across the five-month period in which the SIM-based WhatsApp workers were running.
+The WhatsApp sender pool is the most operationally sensitive part of the platform. Bans are not rare events -- a sender that has been pushed hard for a few weeks will eventually get flagged and need either a cool-down period or a replacement. Table~\ref{tab:wa-bans} shows the ban distribution we actually observed across the five months that the SIM-based WhatsApp workers were running.
 
 \begin{table}[H]
 \centering
@@ -167,12 +167,12 @@ The WhatsApp sender pool is the most operationally sensitive sub-system of the p
 \end{tabularx}
 \end{table}
 
-The pattern is intuitive: freshly registered numbers are flagged much more readily than aged numbers. Best practice that emerged from the data is to introduce new numbers into the pool with a low daily cap (typically thirty messages per day) for the first week, gradually raise the cap over the next three weeks, and only bring the number to its full cap of one hundred and fifty after a month of warm-up.
+The pattern is the obvious one: freshly registered numbers get flagged much more readily than aged numbers. The best-practice we settled on from this data is to introduce new numbers into the pool with a low daily cap (around thirty messages a day) for the first week, raise the cap gradually over the next three weeks, and only let the number hit its full cap of one hundred and fifty after a full month of warm-up.
 
-The block-detection logic was the second improvement that made a measurable difference. Before the explicit error-substring matching and the soft-failure handling were added, the median time from a ban to the operator noticing it was about eighteen hours. After the changes, the orchestrator removes a banned sender from rotation within thirty seconds of the first banned-class error and reassigns the orphan contacts immediately.
+The other improvement that made a visible dent was the block-detection logic. Before we added explicit error-substring matching and soft-failure handling, the median time between a ban and someone noticing was about eighteen hours. After the changes, the orchestrator removes a banned sender from rotation within thirty seconds of the first banned-class error and reassigns the orphan contacts in the same step.
 
 \section{AI Voice Agent Performance}
-The AI voice agent's performance is measured along three dimensions: latency, contact rate and disposition accuracy. The latency budget the internal voice AI platform targets was largely upheld in production: the median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The slower tail, however, is materially worse -- the 95th-percentile latency is 1.4~seconds and the 99th-percentile crosses 2.2~seconds. Figure~\ref{fig:voice-latency} renders the three percentile bars against the 800--900~ms band at which human listeners begin to detect awkwardness; the median sits comfortably below the band, the p95 crosses it, and the p99 is roughly three times the perceptual threshold.
+The AI voice agent gets measured on three things: latency, contact rate and disposition accuracy. The latency budget the internal voice AI platform targets held up in production for the most part. The median turn-end-to-agent-start latency, measured on the warmer half of the turn distribution, was 690 milliseconds. The tail, however, is much worse: the 95th percentile is 1.4 seconds and the 99th crosses 2.2. Figure~\ref{fig:voice-latency} plots the three percentile bars against the 800--900 ms band at which human listeners start to feel something is off. The median sits comfortably below the band, the p95 crosses it, and the p99 is roughly three times the perceptual threshold.
 
 \begin{figure}[H]
 \centering
@@ -205,12 +205,12 @@ The AI voice agent's performance is measured along three dimensions: latency, co
 \label{fig:voice-latency}
 \end{figure}
 
-This tail is dominated by ASR cold starts and is being investigated as part of the next release cycle.
+The tail is dominated by ASR cold starts; the next release cycle has work scheduled on it.
 
-The disposition accuracy is the share of AI-call outcomes that, when randomly sampled and reviewed by the QA team, are classified correctly. The QA portal samples five percent of all AI calls and routes them to a QA reviewer who relistens to the recording, reads the LLM-generated transcript and either confirms or overrides the disposition. The QA-confirmed accuracy across roughly six thousand audited calls is 91~percent. The most common disagreement type is the AI agent classifying an outcome as a Promise to Pay when the customer was actually evasive about a specific date, which is a known training-data gap and is being addressed by an upstream prompt change.
+Disposition accuracy is the share of AI-call outcomes that get classified correctly when QA samples and reviews them. The QA portal pulls a random five percent of all AI calls and hands each to a reviewer, who relistens to the recording, reads the LLM-generated transcript and either confirms or overrides the disposition. Across roughly six thousand audited calls, the QA-confirmed accuracy is 91 percent. The most common disagreement type is the AI agent calling something a Promise to Pay when the customer was actually evasive about a specific date. This is a known training-data gap and is being fixed by an upstream prompt change.
 
 \section{System-Level Metrics}
-A handful of system-level metrics summarise the operational health of the deployment.
+A handful of system-level numbers summarise the operational health of the deployment.
 
 \begin{table}[H]
 \centering
@@ -236,9 +236,9 @@ Analytics events / day & 2.1~million \\
 \end{tabularx}
 \end{table}
 
-The p99 API latency of 980 milliseconds is dominated by campaign-creation requests where a large CSV is parsed synchronously and is being moved to an asynchronous job. The peak job-queue depth of around 1{,}840 pending jobs is well within the queue's capacity. The daily volume of WhatsApp messages dispatched is several times higher than what a comparable Cloud API deployment could send for a typical lender's budget, consistent with the original rationale for the SIM-based approach.
+The p99 API latency of 980 ms is dominated by campaign-creation requests where a large CSV gets parsed synchronously; that path is in the process of moving to an asynchronous job. The peak job-queue depth of around 1,840 pending jobs is comfortably within the queue's capacity. The daily WhatsApp dispatch volume is several times higher than what an equivalent Cloud API deployment could afford to send for a typical lender's budget, which is exactly the original rationale for going SIM-based.
 
 \section{Failure Modes and Stakeholder Feedback}
-A complete result analysis is incomplete without a record of the failure modes encountered in production. The three most consequential were a search-index connection leak that exhausted file descriptors over a few days of running and was fixed by a pooled connection manager with an idle-eviction policy; a race between the voice platform's terminal callback and a defensive status-poll job, fixed by cancelling the in-flight poll job inside the callback handler so that the existing already-processed guard absorbs the laggard; and a timestamp-format change in the voice platform's payload that broke the orchestrator's strict parser on the workflow-poll path, fixed by a tolerant parser plus an alert on any schema break in the inbound payload. Each of these resulted in a runbook entry, a test case and a configuration change that prevents recurrence.
+A results chapter is incomplete without an honest record of what broke in production. The three most consequential failures were the following. First, a search-index connection leak that exhausted file descriptors after a few days of running -- fixed by a pooled connection manager with an idle-eviction policy. Second, a race between the voice platform's terminal callback and the defensive status-poll job. The fix was to cancel the in-flight poll job inside the callback handler so the existing already-processed guard could absorb the laggard. Third, a timestamp-format change in the voice platform's payload that broke the orchestrator's strict parser on the workflow-poll path. The fix was a more tolerant parser plus an alert on any schema break in the inbound payload. Each of these turned into a runbook entry, a test case and a configuration change to prevent it from recurring.
 
-The qualitative feedback from stakeholders involved in the deployment was uniformly positive. Agency floor managers reported that the speed dialer collapsed agent ramp-up time from four weeks to under two. Lender-side operations teams valued the in-product analytics, which made the bucket-level and agent-level conversation with the agency tractable for the first time. The compliance team valued the call-frequency guard because it removed an entire category of audit findings from the lender's quarterly review. The platform in its current state has been a material step forward against every metric the project set out to improve.
+The qualitative feedback from the people who actually use the platform has been uniformly positive. Agency floor managers told us the speed dialer collapsed the typical agent ramp-up time from four weeks to under two. Lender-side operations teams valued the in-product analytics: for the first time they could have a bucket-level and agent-level conversation with the agency without arguing about the numbers. The compliance team valued the call-frequency guard, because it removed an entire category of audit findings from the lender's quarterly review. As it stands today the platform has moved every metric the project set out to improve.

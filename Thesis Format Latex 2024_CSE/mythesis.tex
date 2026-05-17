@@ -1,0 +1,187 @@
+\documentclass[a4paper,12pt,openany]{book}
+
+\usepackage{color}
+\input{rgb}
+%\usepackage{fix-cm}
+%\fontsize{16}{120}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage {times}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{url}
+\usepackage{afterpage}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+%\usepackage[dvips]{color}
+\usepackage{epsfig}
+\usepackage{graphics}
+%\usepackage{ulem}
+\usepackage{textcomp}
+\pagestyle{plain}
+\usepackage{color}
+\bibliographystyle{abbrv}
+%\newtheorem{definition}{Definition}
+%\newtheorem{example}{Example}
+%\usepackage{float}
+\usepackage{ragged2e}
+\usepackage{xspace}
+\textwidth=14.945cm
+\oddsidemargin=0.5cm
+\evensidemargin=0.5cm
+\usepackage{geometry}
+\newgeometry{
+    top=1in,
+    bottom=1in,
+    outer=1in,
+    inner=1.5in,
+}
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+\noindent
+\begin{center}
+%\setlength{\baselineskip}{2\baselineskip}
+{\color{black}
+{\Huge {\bf ``Title Here"\\
+\vspace{1cm}
+ }}}
+\end{center}
+\begin{center}
+{\color{black}
+{\normalsize \bf Major Project/Comprehensive Project Report (any one)\\
+ }}
+\end{center}
+\newcommand{\TitleStyle}[1]{{\Large \textbf{#1}}}
+\newcommand{\TitleSpace}{\vspace{2pt}}
+\vspace{0.2cm}
+\begin{center}
+{\color{black}\textrm{\normalsize Submitted in Partial Fulfillment of the \\Requirements for 
+ the Degree of }}
+\end{center}
+\vspace{0.5cm}
+\begin{center}
+      
+    {\color{black}
+    {\large {\bf BACHELOR OF TECHNOLOGY\\ IN \\ Computer Science and Engineering
+    \vspace{0.1cm}
+    }}}
+\end{center}
+\begin{center}
+%\includegraphics[height=4.0cm]{logo}
+\end{center}
+
+\begin{center}
+{\color{black}\textrm{By \\
+        {\bf Your Name \\
+        Roll Number} \\
+        }}
+\end{center}
+\vspace{0.1cm}
+
+\begin{center}
+{\color{black}\textrm{Under the Guidance of \\
+        {\bf Supervisor Name } \\
+          Assistant Professor, Department of CSE\\
+Pandit Deendayal Energy University\\}}
+\end{center}
+\begin{figure}[h]
+\centerline{\includegraphics[width=4.1cm,height=4.1cm]{images/logo.png}}
+\end{figure}
+\vspace{0.2cm}
+
+\begin{center}
+{\color{black}\textrm{\bf Department of Computer Science and Engineering\\
+School of Technology, Pandit Deendayal Energy University (PDEU)\\Gandhinagar, INDIA, 382426}
+} 
+\vspace{1cm}
+\end{center}
+\begin{center}
+{\color{black}\textrm{\bf May 2026}
+} 
+\end{center}
+
+\end{titlepage}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\thispagestyle{empty}
+\newlength{\origpar}
+\setlength{\origpar}{\parindent}
+\setlength{\parindent}{0pt}
+
+\setlength{\parindent}{\origpar}
+\include{declaration}
+\include{certificate1}
+\include{certificate2}
+\include{certificate3}
+%\addcontentsline{toc}{chapter}{Acknowledgment}
+\include{acknowledgement}
+\setlength{\parindent}{\origpar}
+\input{abstract.tex}
+\addcontentsline{toc}{chapter}{Abstract}
+\clearpage
+
+\addcontentsline{toc}{chapter}{Contents}
+\newgeometry{
+    top=1in,
+    bottom=1in,
+    outer=1in,
+    inner=1.5in,
+}
+\tableofcontents
+\clearpage
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures 
+\clearpage
+\addcontentsline{toc}{chapter}{List of Tables}
+\newgeometry{
+    top=1in,
+    bottom=1in,
+    outer=1.5in,
+    inner=1in,
+}
+\listoftables 
+
+\clearpage
+
+\pagenumbering{arabic}
+
+\input{chapter1}
+\input{chapter2}
+\input{chapter3}
+\input{chapter4}
+\input{chapter5}
+
+%include all chapters here
+\include{conclusions}
+
+
+%include appendexes here
+\input{appendixA.tex}
+
+
+%The following adds references to the table of contents
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{IEEEtran}
+\input{references}
+
+
+
+\end{document}
+
+
+
+

@@ -1,0 +1,86 @@
+% Standalone build of just the Index/TOC page (no border).
+%
+% Build order:
+%   1. Run pdflatex on mythesis.tex three times so mythesis.toc is up to date.
+%   2. Copy mythesis.toc -> mythesis_index_only.toc
+%   3. Run pdflatex on this file.
+%
+% The build_index_only.sh script does these steps in order.
+
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{color}
+\input{rgb}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{float}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{ragged2e}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{caption}
+
+\usepackage[a4paper, top=1in, bottom=1in, left=1.5in, right=1in]{geometry}
+
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\fontsize{18}{22}\selectfont\bfseries}
+  {\fontsize{18}{22}\selectfont\bfseries\chaptertitlename\ \thechapter}
+  {4pt}
+  {\fontsize{18}{22}\selectfont\bfseries}
+\titlespacing*{\chapter}{0pt}{-40pt}{8pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6\baselineskip}
+
+\pagestyle{plain}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+% Match the front-matter page numbering from the main document.
+% In the main thesis, Index is on roman 'v'. Set it here so the
+% page-number footer matches.
+\pagenumbering{roman}
+\setcounter{page}{5}
+
+% Reproduce the same TOC styling used inside mythesis.tex, then call
+% \tableofcontents which reads mythesis_index_only.toc - we copy the
+% main mythesis.toc into mythesis_index_only.toc before compiling.
+\begingroup
+\renewcommand{\contentsname}{Index}
+\setlength{\parskip}{0pt}
+\small
+\linespread{0.9}\selectfont
+\makeatletter
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1pt \@plus\p@
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+\renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+\makeatother
+\tableofcontents
+\endgroup
+
+\end{document}
