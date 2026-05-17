@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.14)  17 MAY 2026 17:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.14)  17 MAY 2026 20:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -823,7 +823,7 @@ pdfTeX warning (dest): name{chapter*.2} has been referenced but does not exist,
 
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr
 /local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on mythesis_index_only.pdf (1 page, 37317 bytes).
+Output written on mythesis_index_only.pdf (1 page, 37382 bytes).
 PDF statistics:
  143 PDF objects out of 1000 (max. 8388607)
  134 compressed objects within 2 object streams

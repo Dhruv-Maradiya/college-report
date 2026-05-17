@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.14)  17 MAY 2026 17:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.14)  17 MAY 2026 20:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1111,13 +1111,13 @@ l.29
 
 
 ] [2] [3]
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
-9.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 6
+1.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [4]
-Overfull \hbox (3.21039pt too wide) in paragraph at lines 71--72
+Overfull \hbox (3.21039pt too wide) in paragraph at lines 73--74
 []\T1/ptm/b/n/12 Chapter 2 -- Lit-er-a-ture Re-view. \T1/ptm/m/n/12 A look at t
 he rel-e-vant prior art: collection-management
  []
@@ -1130,13 +1130,7 @@ Chapter 2.
 Chapter 3.
 [10
 
-] [11]
-Overfull \hbox (2.33463pt too wide) in paragraph at lines 85--86
-[]\T1/ptm/m/n/12 The case list-ing screen, which was my first real fron-tend ti
-cket, is a server-side-paginated
- []
-
-[12] [13] [14] [15] [16] [17]) (./chapter4.tex [18]
+] [11] [12] [13] [14] [15] [16] [17]) (./chapter4.tex [18]
 Chapter 4.
 
 Underfull \hbox (badness 2591) in paragraph at lines 25--25
@@ -1174,7 +1168,7 @@ Underfull \hbox (badness 10000) in alignment at lines 167--167
 Chapter 6.
 [30
 
-]) (./references.tex [31]
+]) [31] (./references.tex [32]
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 23
 .
 
@@ -1186,7 +1180,7 @@ Underfull \hbox (badness 1308) in paragraph at lines 29--30
 b . com / WhiskeySockets /
  []
 
-[32
+[33
 
 ]
 Underfull \hbox (badness 1616) in paragraph at lines 50--51
@@ -1194,7 +1188,7 @@ Underfull \hbox (badness 1616) in paragraph at lines 50--51
  \T1/ptm/m/it/12 MVEL
  []
 
-[33]) (./appendixA.tex [34] [35
+[34]) (./appendixA.tex [35] [36
 
 ]
 Underfull \hbox (badness 4205) in paragraph at lines 63--63
@@ -1206,7 +1200,7 @@ Underfull \hbox (badness 1769) in paragraph at lines 63--63
 []|\T1/ptm/m/n/12 Between 1 and 365; out-of-range
  []
 
-) [36
+) [37
 
 ] (./mythesis.aux (./declaration.aux) (./certificate1.aux)
 (./acknowledgement.aux))
@@ -1218,13 +1212,13 @@ Package rerunfilecheck Info: File `mythesis.out' has not changed.
 (rerunfilecheck)             Checksum: 13689173228DCF2F6A7E8181F30720DB;9281.
  ) 
 Here is how much of TeX's memory you used:
- 29662 strings out of 469006
- 542884 string characters out of 5454813
- 962397 words of memory out of 5000000
- 57636 multiletter control sequences out of 15000+600000
+ 29652 strings out of 469006
+ 542772 string characters out of 5454813
+ 962418 words of memory out of 5000000
+ 57634 multiletter control sequences out of 15000+600000
  694021 words of font info for 116 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 88i,11n,104p,1395b,842s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 88i,11n,104p,1503b,842s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi1
 0.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mmi12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfonts/
@@ -1236,10 +1230,10 @@ ier/ucrr8a.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/u
 tmb8a.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/utmbi8
 a.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ></usr/local/texlive/2026basic/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on mythesis.pdf (46 pages, 259164 bytes).
+Output written on mythesis.pdf (47 pages, 262002 bytes).
 PDF statistics:
- 728 PDF objects out of 1000 (max. 8388607)
- 649 compressed objects within 7 object streams
- 157 named destinations out of 1000 (max. 500000)
+ 721 PDF objects out of 1000 (max. 8388607)
+ 641 compressed objects within 7 object streams
+ 149 named destinations out of 1000 (max. 500000)
  458 words of extra memory for PDF output out of 10000 (max. 10000000)
 
